@@ -196,11 +196,13 @@ class ORMLayer(object):
                 query = self._limit(query, 1)
 
                 rv = query.filter(kwargs).run(conn)
+                print(magenta(kwargs))
             except Exception as e:
                 print(red(e))
                 raise
             else:
                 data = [self._model(_) for _ in rv]
+                print(magenta(data))
                 try:
                     return data[0]
                 except IndexError:

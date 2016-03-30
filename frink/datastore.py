@@ -44,11 +44,17 @@ class FrinkUserDatastore(FrinkDatastore, UserDatastore):
                 return None
 
     def find_user(self, **kwargs):
+        print(cyan('find_user({})'.format(kwargs)))
+        if kwargs.get('id', None) is not None:
+            user = self.user_model.query.get(kwargs['id'])
+            if user is not None:
+                return user
+        # If it's looking up by something else...
         user = self.user_model.query.first(**kwargs)
         if user is not None:
             return user
-        else:
-            return None
+
+        return None
 
     def find_role(self, role):
         return self.role_model.query.get(name=role)
