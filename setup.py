@@ -13,7 +13,7 @@ setuptools.setup(
 
     packages=setuptools.find_packages(),
 
-    install_requires=['schematics', 'rethinkdb'],
+    install_requires=['schematics', 'rethinkdb', 'flask-security'],
 
     classifiers=[
         'Development Status :: 2 - Pre-Alpha',
