@@ -1,5 +1,12 @@
 import setuptools
 
+
+def get_requirements(suffix=''):
+    with open('requirements%s.txt' % suffix) as f:
+        rv = f.read().splitlines()
+    return rv
+
+
 setuptools.setup(
     name="frink",
     version="0.0.1",
@@ -13,7 +20,7 @@ setuptools.setup(
 
     packages=setuptools.find_packages(),
 
-    install_requires=['schematics', 'rethinkdb', 'flask-security'],
+    install_requires=get_requirements(),
 
     classifiers=[
         'Development Status :: 2 - Pre-Alpha',
