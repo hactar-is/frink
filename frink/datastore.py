@@ -30,14 +30,12 @@ class FrinkUserDatastore(FrinkDatastore, UserDatastore):
         UserDatastore.__init__(self, user_model, role_model)
 
     def get_user(self, identifier):
-        print(cyan('get_user({})'.format(identifier)))
         # Note: identifier here is probably an email address
         user = self.user_model.query.get(identifier)
         if user is not None:
             return user
 
         for attr in get_identity_attributes():
-            print(cyan(attr))
             column = getattr(self.user_model, attr)
             user = self.user_model.query.get_by(column=column.name, value=identifier)
             if user is not None:
@@ -56,7 +54,6 @@ class FrinkUserDatastore(FrinkDatastore, UserDatastore):
         return self.role_model.query.get(name=role)
 
     def create_user(self, **kwargs):
-        print("create_user({})".format(kwargs))
         """Creates and returns a new user from the given parameters."""
         kwargs = self._prepare_create_user_args(**kwargs)
         user = self.user_model(kwargs)
