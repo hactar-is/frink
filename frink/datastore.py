@@ -30,23 +30,26 @@ class FrinkUserDatastore(FrinkDatastore, UserDatastore):
         UserDatastore.__init__(self, user_model, role_model)
 
     def get_user(self, identifier):
-        try:
-            return self.user_model.query.get(identifier)
-        except ValueError as e:
-            print(red(e))
-            pass
+        print(cyan('get_user({})'.format(identifier)))
+        # Note: identifier here is probably an email address
+        user = self.user_model.query.get(identifier)
+        if user is not None:
+            return user
+
         for attr in get_identity_attributes():
             print(cyan(attr))
             column = getattr(self.user_model, attr)
-            try:
-                return self.user_model.query.get_by(column=column.name, value=identifier)
-            except self.user_model.DoesNotExist:
-                pass
+            user = self.user_model.query.get_by(column=column.name, value=identifier)
+            if user is not None:
+                return user
+            else:
+                return None
 
     def find_user(self, **kwargs):
-        try:
-            return self.user_model.query.first(**kwargs)
-        except self.user_model.DoesNotExist:
+        user = self.user_model.query.first(**kwargs)
+        if user is not None:
+            return user
+        else:
             return None
 
     def find_role(self, role):

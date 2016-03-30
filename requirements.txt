@@ -1,3 +1,4 @@
 schematics
 rethinkdb
 flask-security
+inflection

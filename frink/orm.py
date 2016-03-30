@@ -12,11 +12,10 @@ import uuid
 import logging
 import rethinkdb as r
 from inflection import tableize
-from rethinkdb.errors import ReqlOpFailedError
 from schematics.models import ModelMeta
 from schematics.exceptions import ModelValidationError
 
-from .errors import SchemasError, DoesNotExist, NotUniqueError
+from .errors import SchemasError, NotUniqueError
 from .registry import model_registry
 from .connection import rconnect
 
@@ -109,7 +108,6 @@ class ORMMeta(ModelMeta):
             cls._orm = ORMLayer(cls._table, cls._model)
             setattr(new_class, 'query', cls._orm)
             setattr(new_class, '_table', cls._table)
-            setattr(new_class, 'DoesNotExist', DoesNotExist)
             # register the model
             model_registry.add(name, new_class, cls)
 
@@ -142,12 +140,10 @@ class ORMLayer(object):
             except Exception as e:
                 print(red(e))
                 raise
-            else:
-                if rv is None:
-                    raise ValueError
-                else:
-                    data = self._model(rv)
-                    return data
+            if rv is not None:
+                return self._model(rv)
+
+            return None
 
     def filter(self, order_by=None, limit=0, **kwargs):
         """
@@ -208,7 +204,7 @@ class ORMLayer(object):
                 try:
                     return data[0]
                 except IndexError:
-                    raise self._model.DoesNotExist
+                    return None
 
     def find_by(self, column=None, value=None, order_by=None, limit=0):
         """
@@ -270,7 +266,7 @@ class ORMLayer(object):
                     try:
                         return data[0]
                     except IndexError:
-                        raise self._model.DoesNotExist
+                        return None
 
     def all(self, order_by=None, limit=0):
         """

@@ -21,9 +21,5 @@ class SchemasError(Exception):
     pass
 
 
-class DoesNotExist(SchemasError):
-    pass
-
-
 class NotUniqueError(SchemasError):
     pass
