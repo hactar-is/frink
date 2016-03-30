@@ -1,7 +1,7 @@
 ORM
 ===
 
-The ORM part of Frink gives you very basic querying abilities. For anything a little more complex you should probably just drop down to RQL anyway.
+The ORM part of Frink gives you very basic querying abilities. For anything a little more complex you should probably just drop down to :ref:`ReQL` anyway.
 
 Querying
 --------
@@ -79,3 +79,15 @@ Get a single instance matched on column / value.
 .. TODO ::
 
     Add an ``offset`` parameter to all methods that have a ``limit`` argument for use with pagination.
+
+
+.. _ReQL:
+
+ReQL
+----
+
+The models all contain references to the database and the table that they're stored in, just in case you ever need to dynamically create a ReQL query. It's also fairly useful even if you're writing them by hand.
+
+::
+
+    r.db(User._db).table(User._table).filter({"firstname": "Jeff"}).run(conn)

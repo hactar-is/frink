@@ -31,6 +31,9 @@ log = get_log()
 class InstanceLayerMixin(object):
 
     def save(self):
+        """
+            Save the current instance to the DB
+        """
         with rconnect() as conn:
             try:
                 self.validate()
@@ -69,6 +72,9 @@ class InstanceLayerMixin(object):
                     return self
 
     def delete(self):
+        """
+            Delete the current instance from the DB.
+        """
         with rconnect() as conn:
             # Can't delete an object without an ID.
             if self.id is None:
@@ -118,6 +124,12 @@ class ORMLayer(object):
         print('query init {}'.format(self._table))
 
     def get(self, id):
+        """
+            Get a single instance by pk id.
+
+            :param id: The UUID of the instance you want to retrieve.
+
+        """
         with rconnect() as conn:
             if id is None:
                 raise ValueError
@@ -138,6 +150,15 @@ class ORMLayer(object):
                     return data
 
     def filter(self, order_by=None, limit=0, **kwargs):
+        """
+            Fetch a list of instances.
+
+            :param order_by: column on which to order the results. \
+            To change the sort, prepend with < or >.
+            :param limit: How many rows to fetch.
+            :param kwargs: keyword args on which to filter, column=value
+
+        """
         with rconnect() as conn:
             print(magenta(kwargs))
             if len(kwargs) == 0:
@@ -158,7 +179,15 @@ class ORMLayer(object):
                 data = [self._model(_) for _ in rv]
                 return data
 
-    def first(self, order_by=None, limit=1, **kwargs):
+    def first(self, order_by=None, **kwargs):
+        """
+            Fetch the first item that matches your filter.
+
+            :param order_by: column on which to order the results. \
+            To change the sort, prepend with < or >.
+            :param kwargs: keyword args on which to filter, column=value
+
+        """
         with rconnect() as conn:
             if len(kwargs) == 0:
                 raise ValueError
@@ -168,7 +197,7 @@ class ORMLayer(object):
                 if order_by is not None:
                     query = self._order_by(query, order_by)
 
-                query = self._limit(query, limit)
+                query = self._limit(query, 1)
 
                 rv = query.filter(kwargs).run(conn)
             except Exception as e:
@@ -182,6 +211,16 @@ class ORMLayer(object):
                     raise self._model.DoesNotExist
 
     def find_by(self, column=None, value=None, order_by=None, limit=0):
+        """
+            Find all items that matches your a column/value.
+
+            :param column: column to search.
+            :param value: value to look for in `column`.
+            :param limit: How many rows to fetch.
+            :param order_by: column on which to order the results. \
+            To change the sort, prepend with < or >.
+
+        """
         with rconnect() as conn:
             if column is None or value is None:
                 raise ValueError("You need to supply both a column and a value")
@@ -202,6 +241,17 @@ class ORMLayer(object):
                 return data
 
     def get_by(self, column=None, value=None):
+        """
+            Find one item that matches your a column/value. Raises `NotUniqueError` if
+            it finds more than one.
+
+            :param column: column to search.
+            :param value: value to look for in `column`.
+            :param limit: How many rows to fetch.
+            :param order_by: column on which to order the results. \
+            To change the sort, prepend with < or >.
+
+        """
         with rconnect() as conn:
             if column is None or value is None:
                 raise ValueError("You need to supply both a column and a value")
@@ -223,6 +273,14 @@ class ORMLayer(object):
                         raise self._model.DoesNotExist
 
     def all(self, order_by=None, limit=0):
+        """
+            Fetch all items.
+
+            :param limit: How many rows to fetch.
+            :param order_by: column on which to order the results. \
+            To change the sort, prepend with < or >.
+
+        """
         with rconnect() as conn:
             try:
                 query = self._base()
