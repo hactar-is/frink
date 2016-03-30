@@ -1,3 +1,6 @@
+[![Codacy Badge](https://api.codacy.com/project/badge/grade/8d673c27b08f4b268b484c1deb5cfe9f)](https://www.codacy.com/app/drcongo/frink)
+[![Documentation Status](https://readthedocs.org/projects/frink/badge/?version=latest)](http://frink.readthedocs.org/en/latest/?badge=latest)
+
 # Frink
 
 Basic ORM-like functionality for RethinkDB on top of Schematics. Built specifically for use with Flask and includes datastore classes for [Flask-Security](https://github.com/mattupstate/flask-security).
