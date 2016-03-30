@@ -1,4 +1,4 @@
-# frink
+# Frink
 
 Basic ORM-like functionality for RethinkDB on top of Schematics. Built specifically for use with Flask and includes datastore classes for [Flask-Security](https://github.com/mattupstate/flask-security).
 

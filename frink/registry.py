@@ -43,7 +43,7 @@ class ModelRegistry(object):
     def _init_model(self, name, model):
         model._model = model
         setattr(model, '_db', self._app.config.get('RDB_DB', 'test'))
-        setattr(model.objects, '_db', self._app.config.get('RDB_DB', 'test'))
+        setattr(model.query, '_db', self._app.config.get('RDB_DB', 'test'))
         if name not in self._tables:
             try:
                 print(green('create {} table for {}'.format(model._table, name)))
