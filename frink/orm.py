@@ -38,7 +38,7 @@ class InstanceLayerMixin(object):
                 self.validate()
             except ModelValidationError as e:
                 print(red(e))
-                return False
+                raise
             else:
                 # If this is a new unsaved object, it'll likely have an
                 # id of None, which RethinkDB won't like. So if it's None,
@@ -92,8 +92,8 @@ class InstanceLayerMixin(object):
                     ).delete().run(conn)
                     log.info(green(rv))
                 except Exception as e:
-                    raise
                     log.warn(red(e))
+                    raise
                 else:
                     return True
         return False

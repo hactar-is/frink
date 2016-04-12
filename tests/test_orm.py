@@ -3,12 +3,22 @@
 from fabric.colors import green, red, blue, cyan, magenta, yellow  # NOQA
 
 import pytest
+import datetime
 
 from app.models import User, Role
 from frink.registry import model_registry
 from frink.datastore import FrinkUserDatastore
 from frink.errors import NotUniqueError
 
+from schematics.exceptions import ModelValidationError
+
+
+invalid_user_dict = {
+    'firstname': 1,
+    'lastname': True,
+    'email': 42,
+    'password': 1337
+}
 
 user_dict = {
     'firstname': 'Michael',
@@ -47,6 +57,12 @@ def test_create_user(app, db):
     assert user.lastname == user_dict['lastname']
     assert user.email == user_dict['email']
     assert user.password == user_dict['password']
+
+
+# def test_create_invalid_user(app, db):
+#     user = User(invalid_user_dict)
+#     with pytest.raises(ModelValidationError):
+#         user.save()
 
 
 def test_create_role(app, db):

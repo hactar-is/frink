@@ -47,3 +47,26 @@ class User(BaseModel, UserMixin):
     login_count = IntType()
 
     roles = ListType(ModelType(Role), default=[])
+
+
+class SlugTest(BaseModel):
+
+    __metaclass__ = ORMMeta
+
+    name = StringType()
+    slug = StringType()
+
+
+class NameTest(BaseModel):
+
+    __metaclass__ = ORMMeta
+
+    name = StringType()
+    something = IntType()
+
+
+class IdTest(BaseModel):
+
+    __metaclass__ = ORMMeta
+
+    something = IntType()

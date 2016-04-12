@@ -2,9 +2,11 @@
 
 from fabric.colors import green, red, blue, cyan, magenta, yellow  # NOQA
 
+import pytest
+
 from app.models import User, Role
-from frink.registry import model_registry
 from frink.datastore import FrinkUserDatastore
+from frink.errors import NotUniqueError
 
 user_dict = {
     'firstname': 'Michael',
@@ -27,30 +29,44 @@ def test_user_datastore_instance(app, db):
 def test_create_user(app, db):
     user = app.user_datastore.create_user(**user_dict)
     assert isinstance(user, User)
-    assert user.firstname == 'Michael'
-    assert user.lastname == 'Harriman'
-    assert user.email == 'harriman@example.com'
-    assert user.password == 'this is a password'
+    assert user.firstname == user_dict['firstname']
+    assert user.lastname == user_dict['lastname']
+    assert user.email == user_dict['email']
+    assert user.password == user_dict['password']
+
+
+def test_create_duplicate_user(app, db):
+    with pytest.raises(NotUniqueError):
+        app.user_datastore.create_user(**user_dict)
 
 
 def test_get_user(app, db):
     user = app.user_datastore.get_user('harriman@example.com')
     assert isinstance(user, User)
-    assert user.firstname == 'Michael'
-    assert user.lastname == 'Harriman'
-    assert user.email == 'harriman@example.com'
-    assert user.password == 'this is a password'
+    assert user.firstname == user_dict['firstname']
+    assert user.lastname == user_dict['lastname']
+    assert user.email == user_dict['email']
+    assert user.password == user_dict['password']
 
 
 def test_find_user(app, db):
     temp_user = app.user_datastore.get_user('harriman@example.com')
-    print(magenta(type(temp_user.id)))
     user = app.user_datastore.find_user(id=temp_user.id)
     assert isinstance(user, User)
-    assert user.firstname == 'Michael'
-    assert user.lastname == 'Harriman'
-    assert user.email == 'harriman@example.com'
-    assert user.password == 'this is a password'
+    assert user.firstname == user_dict['firstname']
+    assert user.lastname == user_dict['lastname']
+    assert user.email == user_dict['email']
+    assert user.password == user_dict['password']
+
+
+def test_find_user_by_lastname(app, db):
+    temp_user = app.user_datastore.get_user('harriman@example.com')
+    user = app.user_datastore.find_user(lastname=user_dict['lastname'])
+    assert isinstance(user, User)
+    assert user.firstname == user_dict['firstname']
+    assert user.lastname == user_dict['lastname']
+    assert user.email == user_dict['email']
+    assert user.password == user_dict['password']
 
 
 def test_orm_create_role(app, db):
@@ -83,11 +99,11 @@ def test_has_role(app, db):
     assert user.has_role(role) is True
 
 
-def test_delete_it_all(app, db):
+def test_delete(app, db):
     user1 = app.user_datastore.get_user('harriman@example.com')
     role1 = app.user_datastore.find_role('User')
-    assert user1.delete() is True
-    assert role1.delete() is True
+    app.user_datastore.delete(user1)
+    app.user_datastore.delete(role1)
     user2 = app.user_datastore.get_user('harriman@example.com')
     role2 = app.user_datastore.find_role('User')
     assert user2 is None
