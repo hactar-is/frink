@@ -1,8 +1,12 @@
 Install
 =======
 
-Until it's published on PyPI, the best thing to do is to clone the repo into your project and then pip install it as editable. Something like this...
+.. code-block:: bash
 
+    pip install frink
+
+
+If you are contributing to the development of Frink, install it as an editable package from your own clone of the git repo. That way you can commit and push you edits.
 
 .. code-block:: bash
 

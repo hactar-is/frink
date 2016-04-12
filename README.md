@@ -17,7 +17,7 @@ Don't install it yet.
 
 ## Requirements
 
-Requires the excellent [schematics](https://github.com/schematics/schematics) and the [rethinkdb](https://pypi.python.org/pypi/rethinkdb/) driver.
+Requires the excellent [schematics](https://github.com/schematics/schematics), the [rethinkdb](https://pypi.python.org/pypi/rethinkdb/) driver, and inflection.
 
 ## Compatibility
 
