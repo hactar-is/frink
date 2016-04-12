@@ -1,5 +1,5 @@
 flask
 schematics
-rethinkdb
+rethinkdb==2.3.0
 flask-security
 inflection

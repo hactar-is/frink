@@ -9,7 +9,7 @@ def get_requirements(suffix=''):
 
 setuptools.setup(
     name="frink",
-    version="0.0.1",
+    version="0.0.2",
     url="https://github.com/hactar-is/frink",
 
     author="Hactar",

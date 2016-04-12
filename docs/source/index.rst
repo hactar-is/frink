@@ -13,7 +13,7 @@ Frink is a super basic ORM-like thing for using RethinkDB in Flask, built on top
 
 .. WARNING::
 
-    Frink is currently pre-alpha and extremely likely to change. It doesn't even have any tests yet.
+    Frink is currently pre-alpha and extremely likely to change. However, it is stable enough in the Flask-Security datastore that you could probably use it to enable Flask-Security to work with RethinkDB.
 
 .. toctree::
    :maxdepth: 2
@@ -24,6 +24,8 @@ Frink is a super basic ORM-like thing for using RethinkDB in Flask, built on top
    orm/index
 
    api/index
+
+   changelog
 
 
 Contributing
