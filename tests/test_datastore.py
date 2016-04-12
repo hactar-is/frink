@@ -84,11 +84,11 @@ def test_has_role(app, db):
 
 
 def test_delete_it_all(app, db):
-    user = app.user_datastore.get_user('harriman@example.com')
-    role = app.user_datastore.find_role('User')
-    user.delete()
-    role.delete()
-    user = app.user_datastore.get_user('harriman@example.com')
-    role = app.user_datastore.find_role('User')
-    assert user is None
-    assert role is None
+    user1 = app.user_datastore.get_user('harriman@example.com')
+    role1 = app.user_datastore.find_role('User')
+    assert user1.delete() is True
+    assert role1.delete() is True
+    user2 = app.user_datastore.get_user('harriman@example.com')
+    role2 = app.user_datastore.find_role('User')
+    assert user2 is None
+    assert role2 is None

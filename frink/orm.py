@@ -79,6 +79,9 @@ class InstanceLayerMixin(object):
             if self.id is None:
                 raise FrinkError
             else:
+                if isinstance(self.id, uuid.UUID):
+                    self.id = str(self.id)
+
                 try:
                     rv = r.db(
                         self._db
@@ -89,9 +92,11 @@ class InstanceLayerMixin(object):
                     ).delete().run(conn)
                     log.info(green(rv))
                 except Exception as e:
+                    raise
                     log.warn(red(e))
                 else:
                     return True
+        return False
 
 
 class ORMMeta(ModelMeta):
