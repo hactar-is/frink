@@ -46,4 +46,4 @@ class User(BaseModel, UserMixin):
     current_login_ip = StringType()
     login_count = IntType()
 
-    roles = ListType(ModelType(Role))
+    roles = ListType(ModelType(Role), default=[])

@@ -172,10 +172,12 @@ class ORMLayer(object):
                 query = self._base()
                 if order_by is not None:
                     query = self._order_by(query, order_by)
+
+                rv = query.filter(kwargs).run(conn)
+
                 if limit > 0:
                     query = self._limit(query, limit)
 
-                rv = query.filter(kwargs).run(conn)
             except Exception as e:
                 print(red(e))
                 raise
@@ -201,16 +203,15 @@ class ORMLayer(object):
                 if order_by is not None:
                     query = self._order_by(query, order_by)
 
+                # NOTE: Always filter before limiting
+                query = query.filter(kwargs)
                 query = self._limit(query, 1)
-
-                rv = query.filter(kwargs).run(conn)
-                print(magenta(kwargs))
+                rv = query.run(conn)
             except Exception as e:
                 print(red(e))
                 raise
             else:
                 data = [self._model(_) for _ in rv]
-                print(magenta(data))
                 try:
                     return data[0]
                 except IndexError:
