@@ -16,7 +16,8 @@ setuptools.setup(
     author_email="systems@hactar.is",
 
     description="Basic ORM-like functionality for a RethinkDB datastore on top of Schematics.",
-    long_description=open('README.md').read(),
+    long_description="""Basic ORM-like functionality for a RethinkDB datastore on top of
+    Schematics. Includes datastores for use with Flask-Security.""",
 
     packages=setuptools.find_packages(),
 
