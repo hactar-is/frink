@@ -16,7 +16,7 @@ from app.core import db as _db
 from frink.connection import rconnect
 
 
-@pytest.yield_fixture(scope='function')
+@pytest.yield_fixture(scope='session')
 def app():
     _app = create_app('frink_test')
     ctx = _app.test_request_context()
@@ -27,10 +27,10 @@ def app():
     ctx.pop()
 
 
-@pytest.yield_fixture(scope='function')
+@pytest.yield_fixture(scope='session')
 def db(app):
     _db.app = app
 
     yield _db
 
-    # _db.drop_all(app)
+    _db.drop_all(app)

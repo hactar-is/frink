@@ -67,5 +67,11 @@ class FrinkUserDatastore(FrinkDatastore, UserDatastore):
         user = self.user_model(kwargs)
         if self.get_user(user.email) is not None:
             raise NotUniqueError
-        if user.validate():
-            return self.put(user)
+        try:
+            user.validate()
+        except:
+            raise
+        else:
+            user = self.put(user)
+            return user
+        return False
