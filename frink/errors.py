@@ -17,9 +17,9 @@ def get_log(extra=None):
 log = get_log()
 
 
-class SchemasError(Exception):
+class FrinkError(Exception):
     pass
 
 
-class NotUniqueError(SchemasError):
+class NotUniqueError(FrinkError):
     pass

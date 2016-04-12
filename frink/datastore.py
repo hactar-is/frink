@@ -59,7 +59,7 @@ class FrinkUserDatastore(FrinkDatastore, UserDatastore):
         return None
 
     def find_role(self, role):
-        return self.role_model.query.get(name=role)
+        return self.role_model.query.first(name=role)
 
     def create_user(self, **kwargs):
         """Creates and returns a new user from the given parameters."""

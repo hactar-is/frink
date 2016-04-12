@@ -15,7 +15,7 @@ from inflection import tableize
 from schematics.models import ModelMeta
 from schematics.exceptions import ModelValidationError
 
-from .errors import SchemasError, NotUniqueError
+from .errors import FrinkError, NotUniqueError
 from .registry import model_registry
 from .connection import rconnect
 
@@ -77,7 +77,7 @@ class InstanceLayerMixin(object):
         with rconnect() as conn:
             # Can't delete an object without an ID.
             if self.id is None:
-                raise SchemasError
+                raise FrinkError
             else:
                 try:
                     rv = r.db(
@@ -131,6 +131,9 @@ class ORMLayer(object):
         with rconnect() as conn:
             if id is None:
                 raise ValueError
+
+            if isinstance(id, uuid.UUID):
+                id = str(id)
 
             if type(id) != str and type(id) != unicode:
                 raise ValueError
