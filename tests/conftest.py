@@ -9,7 +9,11 @@ import os
 
 import pytest
 
+import rethinkdb as r
 from app.factory import create_app
+from app.core import db as _db
+
+from frink.connection import rconnect
 
 
 @pytest.yield_fixture(scope='function')
@@ -21,3 +25,12 @@ def app():
     yield _app
 
     ctx.pop()
+
+
+@pytest.yield_fixture(scope='function')
+def db(app):
+    _db.app = app
+
+    yield _db
+
+    # _db.drop_all(app)

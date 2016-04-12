@@ -12,6 +12,8 @@ from fabric.colors import green, red, blue, cyan, magenta, yellow  # NOQA
 from flask.ext.security.datastore import Datastore, UserDatastore
 from flask.ext.security.utils import get_identity_attributes
 
+from .errors import NotUniqueError
+
 
 class FrinkDatastore(Datastore):
     def put(self, model):
@@ -63,4 +65,7 @@ class FrinkUserDatastore(FrinkDatastore, UserDatastore):
         """Creates and returns a new user from the given parameters."""
         kwargs = self._prepare_create_user_args(**kwargs)
         user = self.user_model(kwargs)
-        return self.put(user)
+        if self.get_user(user.email) is not None:
+            raise NotUniqueError
+        if user.validate():
+            return self.put(user)

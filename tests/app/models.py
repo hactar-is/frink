@@ -33,6 +33,8 @@ class User(BaseModel, UserMixin):
 
     __metaclass__ = ORMMeta
 
+    firstname = StringType()
+    lastname = StringType()
     email = StringType()
     password = StringType()
     active = BooleanType(default=True)

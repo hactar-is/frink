@@ -51,6 +51,10 @@ class RethinkDB(object):
         finally:
             connection.close()
 
+    def drop_all(self, app):
+        conn = self.connection(app)
+        return r.db_drop(app.config['RDB_DB']).run(conn)
+
     def init_app(self, app):
 
         print(magenta('RethinkSetup.init_app'))
