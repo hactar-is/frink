@@ -13,3 +13,7 @@ def test_db_config(app):
     assert app.config['RDB_PORT'] == 28015
     assert app.config['RDB_DB'] == 'frink_tests'
 
+
+def test_request(app, client):
+    rv = client.get('/ping/')
+    assert rv.status_code == 200

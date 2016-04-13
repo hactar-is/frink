@@ -6,7 +6,7 @@
     create app
 """
 
-from flask import Flask
+from flask import Flask, jsonify
 from fabric.colors import green, red, blue, cyan, magenta, yellow  # NOQA
 
 from .core import db, security
@@ -25,5 +25,9 @@ def create_app(package_name):
     security.init_app(app, user_datastore)
     # security.init_app(app, user_datastore, confirm_register_form=ExtendedConfirmRegisterForm)
     app.user_datastore = user_datastore
+
+    @app.route('/ping/')
+    def ping():
+        return jsonify({'response': 'PONG!'})
 
     return app
