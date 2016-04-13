@@ -1,6 +1,14 @@
 Change Log
 ==========
 
+0.0.3
+-----
+
+* Improved test coverage
+* Fixed bug in ordering on filter
+
+
+
 0.0.2
 -----
 
