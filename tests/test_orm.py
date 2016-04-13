@@ -5,10 +5,12 @@ from fabric.colors import green, red, blue, cyan, magenta, yellow  # NOQA
 import pytest
 import datetime
 
+from rethinkdb.errors import ReqlOpFailedError
+
 from app.models import User, Role
 from frink.registry import model_registry
 from frink.datastore import FrinkUserDatastore
-from frink.errors import NotUniqueError
+from frink.errors import NotUniqueError, FrinkError
 
 from schematics.exceptions import ModelConversionError, ValidationError
 
@@ -116,6 +118,24 @@ def test_orm_first(app, db):
     assert user.password == user_dict['password']
 
 
+def test_orm_first_asc(app, db):
+    user = User.query.first(active=True, order_by='<sort_on')
+    assert isinstance(user, User)
+    assert user.sort_on == 0
+
+
+def test_orm_first_desc(app, db):
+    user = User.query.first(active=True, order_by='>sort_on')
+    assert isinstance(user, User)
+    assert user.sort_on == 1
+
+
+def test_orm_first_default(app, db):
+    user = User.query.first(active=True, order_by='sort_on')
+    assert isinstance(user, User)
+    assert user.sort_on == 0
+
+
 def test_append_role(app, db):
     _u = User.query.first(email=user_dict['email'])
     assert _u is not None
@@ -134,6 +154,33 @@ def test_append_role(app, db):
 def test_all(app, db):
     users = User.query.all()
     assert len(users) == 2
+
+
+def test_all_ordered(app, db):
+    users = User.query.all(order_by='sort_on')
+    assert len(users) == 2
+    assert users[0].sort_on == 0
+    assert users[1].sort_on == 1
+    users = User.query.all(order_by='<sort_on')
+    assert len(users) == 2
+    assert users[0].sort_on == 0
+    assert users[1].sort_on == 1
+    users = User.query.all(order_by='>sort_on')
+    assert len(users) == 2
+    assert users[0].sort_on == 1
+    assert users[1].sort_on == 0
+
+
+def test_all_ordered_limited(app, db):
+    users = User.query.all(order_by='sort_on', limit=1)
+    assert len(users) == 1
+    assert users[0].sort_on == 0
+    users = User.query.all(order_by='<sort_on', limit=1)
+    assert len(users) == 1
+    assert users[0].sort_on == 0
+    users = User.query.all(order_by='>sort_on', limit=1)
+    assert len(users) == 1
+    assert users[0].sort_on == 1
 
 
 def test_filter(app, db):
@@ -187,6 +234,31 @@ def test_find_by(app, db):
     assert len(users) == 0
 
 
+def test_find_by_ordered(app, db):
+    users = User.query.find_by(column='active', value=True, order_by='<sort_on')  # Should return all
+    assert len(users) == 2
+    assert users[0].sort_on == 0
+    assert users[1].sort_on == 1
+    users = User.query.find_by(column='active', value=True, order_by='>sort_on')  # Should return all
+    assert len(users) == 2
+    assert users[0].sort_on == 1
+    assert users[1].sort_on == 0
+
+
+def test_find_by_ordered_limit(app, db):
+    users = User.query.find_by(column='active', value=True, order_by='<sort_on', limit=1)
+    assert len(users) == 1
+    assert users[0].sort_on == 0
+    users = User.query.find_by(column='active', value=True, order_by='>sort_on', limit=1)
+    assert len(users) == 1
+    assert users[0].sort_on == 1
+
+
+####################################################################################################
+# Test Failures
+####################################################################################################
+
+
 def test_get_by(app, db):
     with pytest.raises(NotUniqueError):
         user = User.query.get_by(column='active', value=True)  # Should raise NotUniqueError
@@ -195,6 +267,82 @@ def test_get_by(app, db):
     assert user.email == user_dict['email']
     user = User.query.get_by(column='email', value='unknown@example.com')  # Should return None
     assert user is None
+
+
+def test_save_failure(app, db):
+    u = User(user_dict)
+    old_table = u._table
+    u._table = 'this_table_doesnt_exist'
+    with pytest.raises(Exception) as excinfo:
+        u.save()
+    u._table = old_table
+
+
+def test_delete_with_no_id(app, db):
+    u = User.query.first(email=user_dict['email'])
+    assert isinstance(u, User)
+    u.id = None
+    with pytest.raises(FrinkError) as excinfo:
+        u.delete()
+    assert "You can't delete an object with no ID" in excinfo.value
+
+
+def test_delete_failure(app, db):
+    u = User.query.first(email=user_dict['email'])
+    old_table = u._table
+    u._table = 'this_table_doesnt_exist'
+    with pytest.raises(ReqlOpFailedError) as excinfo:
+        u.delete()
+    u._table = old_table
+
+
+def test_get_with_none_id(app, db):
+    with pytest.raises(ValueError) as excinfo:
+        User.query.get(None)
+
+
+def test_find_by_with_no_column(app, db):
+    with pytest.raises(ValueError) as excinfo:
+        User.query.find_by(value=1)
+
+
+def test_find_by_with_no_value(app, db):
+    with pytest.raises(ValueError) as excinfo:
+        User.query.find_by(column='sort_on')
+
+
+def test_get_by_with_no_column(app, db):
+    with pytest.raises(ValueError) as excinfo:
+        User.query.get_by(value=1)
+
+
+def test_get_by_with_no_value(app, db):
+    with pytest.raises(ValueError) as excinfo:
+        User.query.get_by(column='sort_on')
+
+
+def test_get_with_int_id(app, db):
+    with pytest.raises(ValueError) as excinfo:
+        User.query.get(100)
+
+
+def test_filter_with_no_kwargs(app, db):
+    with pytest.raises(ValueError) as excinfo:
+        User.query.filter(order_by='sort_on', limit=2)
+
+
+def test_first_with_no_kwargs(app, db):
+    with pytest.raises(ValueError) as excinfo:
+        User.query.first(order_by='sort_on')
+
+def test_limiting_with_non_int(app, db):
+    with pytest.raises(ValueError):
+        users = User.query.find_by(column='active', value=True, order_by='>sort_on', limit='whut')
+
+
+####################################################################################################
+# Clean up
+####################################################################################################
 
 
 def test_delete_it_all(app, db):
@@ -214,3 +362,26 @@ def test_delete_it_all(app, db):
     assert role1 is None
     assert user2 is None
     assert role2 is None
+
+
+####################################################################################################
+# Failing tests
+####################################################################################################
+
+
+"""
+    This one is making a perfectly valid query no matter what I do to try to give it a bad db or
+    table name. Maybe this is a good thing.
+"""
+
+# def test_filter_with_bad_table(app, db):
+#     old_table = User._table
+#     old_db = User._orm._db
+#     User._table = 'this_table_doesnt_exist'
+#     User._orm._table = 'this_table_doesnt_exist'
+#     User._orm._db = 'this_db_doesnt_exist'
+#     with pytest.raises(ReqlOpFailedError) as excinfo:
+#         User.query.filter(order_by='sort_on', limit=2, email=user_dict['email'])
+#     User._table = old_table
+#     User._orm._table = old_table
+#     User._orm._db = old_db

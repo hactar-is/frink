@@ -11,6 +11,7 @@ from fabric.colors import green, red, blue, cyan, magenta, yellow  # NOQA
 import uuid
 import logging
 import rethinkdb as r
+from rethinkdb.errors import ReqlOpFailedError, ReqlQueryLogicError
 from inflection import tableize
 from schematics.models import ModelMeta
 from schematics.exceptions import ModelValidationError, ValidationError, ModelConversionError
@@ -76,6 +77,7 @@ class InstanceLayerMixin(object):
                 except Exception as e:
                     log.warn(red(e))
                     self.id = None
+                    raise
                 else:
                     return self
 
@@ -86,7 +88,7 @@ class InstanceLayerMixin(object):
         with rconnect() as conn:
             # Can't delete an object without an ID.
             if self.id is None:
-                raise FrinkError
+                raise FrinkError("You can't delete an object with no ID")
             else:
                 if isinstance(self.id, uuid.UUID):
                     self.id = str(self.id)
@@ -99,13 +101,11 @@ class InstanceLayerMixin(object):
                     ).get(
                         self.id
                     ).delete().run(conn)
-                    log.info(green(rv))
                 except Exception as e:
                     log.warn(red(e))
                     raise
                 else:
                     return True
-        return False
 
 
 class ORMMeta(ModelMeta):
@@ -133,7 +133,6 @@ class ORMLayer(object):
     def __init__(self, table, model):
         self._model = model
         self._table = table
-        print('query init {}'.format(self._table))
 
     def get(self, id):
         """
@@ -153,7 +152,12 @@ class ORMLayer(object):
                 raise ValueError
 
             try:
-                rv = self._base().get(id).run(conn)
+                query = self._base().get(id)
+                print(cyan(query))
+                rv = query.run(conn)
+            except ReqlOpFailedError as e:
+                print(red(e))
+                raise
             except Exception as e:
                 print(red(e))
                 raise
@@ -173,7 +177,6 @@ class ORMLayer(object):
 
         """
         with rconnect() as conn:
-            print(magenta(kwargs))
             if len(kwargs) == 0:
                 raise ValueError
 
@@ -190,6 +193,9 @@ class ORMLayer(object):
                 print(magenta(query))
                 rv = query.run(conn)
 
+            except ReqlOpFailedError as e:
+                print(red(e))
+                raise
             except Exception as e:
                 print(red(e))
                 raise
@@ -213,12 +219,17 @@ class ORMLayer(object):
             try:
                 query = self._base()
                 if order_by is not None:
+                    print(red(order_by))
                     query = self._order_by(query, order_by)
 
                 # NOTE: Always filter before limiting
                 query = query.filter(kwargs)
                 query = self._limit(query, 1)
                 rv = query.run(conn)
+
+            except ReqlOpFailedError as e:
+                print(red(e))
+                raise
             except Exception as e:
                 print(red(e))
                 raise
@@ -317,6 +328,8 @@ class ORMLayer(object):
                 return data
 
     def _limit(self, query, limit):
+        if not isinstance(limit, int):
+            raise ValueError('Limit must be an integer')
         with rconnect() as conn:
             try:
                 rv = query.limit(limit)
