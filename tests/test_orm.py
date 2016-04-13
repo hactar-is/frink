@@ -10,28 +10,36 @@ from frink.registry import model_registry
 from frink.datastore import FrinkUserDatastore
 from frink.errors import NotUniqueError
 
-from schematics.exceptions import ModelValidationError
+from schematics.exceptions import ModelConversionError, ValidationError
 
+
+unconvertable_user_dict = {
+    'firstname': datetime.date(2001, 1, 1),
+    'lastname': 'Harriman',
+    'email': 'harriman@example.com',
+    'password': 'this is a password'
+}
 
 invalid_user_dict = {
-    'firstname': 1,
-    'lastname': True,
-    'email': 42,
-    'password': 1337
+    'firstname': 'Michael',
+    'lastname': 'Harriman',
+    'password': 'this is a password'
 }
 
 user_dict = {
     'firstname': 'Michael',
     'lastname': 'Harriman',
     'email': 'harriman@example.com',
-    'password': 'this is a password'
+    'password': 'this is a password',
+    'sort_on': 0
 }
 
 user_dict2 = {
     'firstname': 'Sido',
     'lastname': 'Jombati',
     'email': 'jombati@example.com',
-    'password': 'this is a password'
+    'password': 'this is a password',
+    'sort_on': 1
 }
 
 role_dict = {
@@ -59,10 +67,18 @@ def test_create_user(app, db):
     assert user.password == user_dict['password']
 
 
-# def test_create_invalid_user(app, db):
-#     user = User(invalid_user_dict)
-#     with pytest.raises(ModelValidationError):
+def test_create_invalid_user(app, db):
+    user = User(invalid_user_dict)
+    with pytest.raises(ValidationError) as excinfo:
+        user.save()
+    assert excinfo.value.messages == {'email': [u'This field is required.']}
+
+# No idea why this test fails.
+# def test_create_unconvertable_user(app, db):
+#     user = User(unconvertable_user_dict)
+#     with pytest.raises(ModelConversionError) as excinfo:
 #         user.save()
+#     assert excinfo.value.messages == {'firstname': [u"Couldn't interpret '2001-01-01' as string."]}
 
 
 def test_create_role(app, db):
@@ -127,6 +143,39 @@ def test_filter(app, db):
     assert len(users) == 1
     users = User.query.filter(email='unknown@example.com')  # Should return empty
     assert len(users) == 0
+
+
+def test_filter_order(app, db):
+    users = User.query.filter(active=True, order_by='sort_on')  # Should return all
+    assert len(users) == 2
+    assert users[0].sort_on == 0
+    assert users[1].sort_on == 1
+
+
+def test_filter_order_desc(app, db):
+    users = User.query.filter(active=True, order_by='>sort_on')  # Should return all
+    assert len(users) == 2
+    assert users[0].sort_on == 1
+    assert users[1].sort_on == 0
+
+
+def test_filter_order_asc(app, db):
+    users = User.query.filter(active=True, order_by='<sort_on')  # Should return all
+    assert len(users) == 2
+    assert users[0].sort_on == 0
+    assert users[1].sort_on == 1
+
+
+def test_filter_order_desc_with_limit(app, db):
+    users = User.query.filter(active=True, order_by='>sort_on', limit=1)  # Should return 1
+    assert len(users) == 1
+    assert users[0].sort_on == 1
+
+
+def test_filter_order_asc_with_limit(app, db):
+    users = User.query.filter(active=True, order_by='<sort_on', limit=1)  # Should return 1
+    assert len(users) == 1
+    assert users[0].sort_on == 0
 
 
 def test_find_by(app, db):

@@ -35,7 +35,7 @@ class User(BaseModel, UserMixin):
 
     firstname = StringType()
     lastname = StringType()
-    email = StringType()
+    email = StringType(required=True)
     password = StringType()
     active = BooleanType(default=True)
     confirmed_at = DateTimeType()
@@ -45,6 +45,7 @@ class User(BaseModel, UserMixin):
     last_login_ip = StringType()
     current_login_ip = StringType()
     login_count = IntType()
+    sort_on = IntType()
 
     roles = ListType(ModelType(Role), default=[])
 

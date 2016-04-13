@@ -13,7 +13,7 @@ import logging
 import rethinkdb as r
 from inflection import tableize
 from schematics.models import ModelMeta
-from schematics.exceptions import ModelValidationError
+from schematics.exceptions import ModelValidationError, ValidationError, ModelConversionError
 
 from .errors import FrinkError, NotUniqueError
 from .registry import model_registry
@@ -36,8 +36,17 @@ class InstanceLayerMixin(object):
         with rconnect() as conn:
             try:
                 self.validate()
+            except ValidationError as e:
+                print(red(e.messages))
+                raise
             except ModelValidationError as e:
-                print(red(e))
+                print(red(e.messages))
+                raise
+            except ModelConversionError as e:
+                print(red(e.messages))
+                raise
+            except Exception as e:
+                print(red(e.messages))
                 raise
             else:
                 # If this is a new unsaved object, it'll likely have an
@@ -170,13 +179,16 @@ class ORMLayer(object):
 
             try:
                 query = self._base()
+                query = query.filter(kwargs)
+
                 if order_by is not None:
                     query = self._order_by(query, order_by)
 
-                rv = query.filter(kwargs).run(conn)
-
                 if limit > 0:
                     query = self._limit(query, limit)
+
+                print(magenta(query))
+                rv = query.run(conn)
 
             except Exception as e:
                 print(red(e))
@@ -317,10 +329,8 @@ class ORMLayer(object):
     def _order_by(self, query, column):
         with rconnect() as conn:
             if column.startswith('>'):
-                column = column[1:]
                 index = r.desc(column[1:])
             elif column.startswith('<'):
-                column = column[1:]
                 index = r.asc(column[1:])
             else:
                 index = column

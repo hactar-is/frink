@@ -26,6 +26,10 @@ class BaseModel(Model, InstanceLayerMixin):
     created_at = DateTimeType(default=datetime.datetime.now)
     updated_at = DateTimeType(default=datetime.datetime.now)
 
+    def validate(self):
+        print('validating')
+        super(BaseModel, self).validate()
+
     def __repr__(self):
         if hasattr(self, 'email'):
             return u'<{}: {}>'.format(self.__class__.__name__, self.email)
