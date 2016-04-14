@@ -48,7 +48,7 @@ class FrinkUserDatastore(FrinkDatastore, UserDatastore):
                 return None
 
     def find_user(self, **kwargs):
-        log.info('find_user({})'.format(kwargs))
+        log.debug('find_user({})'.format(kwargs))
         if kwargs.get('id', None) is not None:
             user = self.user_model.query.get(kwargs['id'])
             if user is not None:

@@ -21,7 +21,7 @@ class ModelRegistry(object):
         self._app = None
 
     def add(self, name, model, meta):
-        log.info('Registering {} (initialised: {})'.format(
+        log.debug('Registering {} (initialised: {})'.format(
             name, self._initialsed
         ))
 
@@ -36,7 +36,7 @@ class ModelRegistry(object):
             self._init_model(name, model)
 
     def init_app(self, app):
-        log.info('registry init_app')
+        log.debug('registry init_app')
         self._app = app
         for name, model in self._models.items():
             self._init_model(name, model)
@@ -48,7 +48,7 @@ class ModelRegistry(object):
         setattr(model.query, '_db', self._app.config.get('RDB_DB', 'test'))
         if name not in self._tables:
             try:
-                log.info('create {} table for {}'.format(model._table, name))
+                log.debug('create {} table for {}'.format(model._table, name))
                 self._conn = r.connect(
                     host=self._app.config.get('RDB_HOST'),
                     port=self._app.config.get('RDB_PORT'),
@@ -57,7 +57,7 @@ class ModelRegistry(object):
                 r.db(model._db).table_create(model._table).run(self._conn)
                 self._conn.close()
             except ReqlOpFailedError as e:
-                log.info('{} table probably already exists'.format(model._table))
+                log.debug('{} table probably already exists'.format(model._table))
             except Exception as e:
                 log.warn(e)
                 raise

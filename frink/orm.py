@@ -49,7 +49,7 @@ class InstanceLayerMixin(object):
                 # it to None.
                 if self.id is None:
                     self.id = str(uuid.uuid4())
-                    log.info(self.id)
+                    log.debug(self.id)
 
                 try:
                     rv = r.db(self._db).table(self._table).insert(
@@ -66,7 +66,7 @@ class InstanceLayerMixin(object):
                     #   u'replaced': 0,
                     #   u'inserted': 1
                     # }
-                    log.info(rv)
+                    log.debug(rv)
                 except Exception as e:
                     log.warn(e)
                     self.id = None
@@ -147,7 +147,7 @@ class ORMLayer(object):
 
             try:
                 query = self._base().get(id)
-                log.info(query)
+                log.debug(query)
                 rv = query.run(conn)
             except ReqlOpFailedError as e:
                 log.warn(e)
@@ -184,7 +184,7 @@ class ORMLayer(object):
                 if limit > 0:
                     query = self._limit(query, limit)
 
-                log.info(query)
+                log.debug(query)
                 rv = query.run(conn)
 
             except ReqlOpFailedError as e:

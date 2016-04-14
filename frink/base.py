@@ -30,7 +30,7 @@ class BaseModel(Model, InstanceLayerMixin):
     updated_at = DateTimeType(default=datetime.datetime.now)
 
     def validate(self):
-        log.info('validating')
+        log.debug('validating')
         super(BaseModel, self).validate()
 
     def __repr__(self):

@@ -19,7 +19,7 @@ log = logging.getLogger(__name__)
 
 class rconnect(object):
     def __enter__(self):
-        log.info('CONNECT ENTER')
+        log.debug('CONNECT ENTER')
         try:
             app = current_app
             self.conn = r.connect(
@@ -33,7 +33,7 @@ class rconnect(object):
             return self.conn
 
     def __exit__(self, type, value, traceback):
-        log.info('CONNECT EXIT')
+        log.debug('CONNECT EXIT')
         self.conn.close()
 
 
@@ -46,9 +46,9 @@ class RethinkDB(object):
         connection = r.connect(host=app.config.get('RDB_HOST'), port=app.config.get('RDB_PORT'))
         try:
             r.db_create(app.config.get('RDB_DB')).run(connection)
-            log.info('Database setup completed')
+            log.debug('Database setup completed')
         except RqlRuntimeError:
-            log.info('Database already exists.')
+            log.debug('Database already exists.')
         finally:
             connection.close()
 
@@ -57,7 +57,7 @@ class RethinkDB(object):
         return r.db_drop(app.config['RDB_DB']).run(conn)
 
     def disconnect(self, app=None):
-        log.info('DISCONNECT')
+        log.debug('DISCONNECT')
         if app is None:
             app = self._app
 
@@ -67,7 +67,7 @@ class RethinkDB(object):
             pass
 
     def connect(self, app=None):
-        log.info('CONNECT')
+        log.debug('CONNECT')
         if app is None:
             app = self._app
 
@@ -82,7 +82,7 @@ class RethinkDB(object):
             abort(503, "Database connection could be established.")
 
     def init_app(self, app):
-        log.info('RethinkSetup.init_app')
+        log.debug('RethinkSetup.init_app')
         self._app = app
         self.setup(app)
 
