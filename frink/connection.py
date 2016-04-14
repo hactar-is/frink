@@ -6,21 +6,22 @@
     Setup of RethinkDB stuff.
 """
 
-from fabric.colors import green, red, blue, cyan, magenta, yellow  # NOQA
-
-from flask import abort
-from functools import wraps
-from flask import current_app as app
-from contextlib import contextmanager
+from flask import abort, current_app
 import rethinkdb as r
 from rethinkdb.errors import RqlRuntimeError, RqlDriverError
+
+# Frink
 from .registry import model_registry
+
+import logging
+log = logging.getLogger(__name__)
 
 
 class rconnect(object):
     def __enter__(self):
-        print(green('CONNECT ENTER'))
+        log.info('CONNECT ENTER')
         try:
+            app = current_app
             self.conn = r.connect(
                 host=app.config.get('RDB_HOST'),
                 port=app.config.get('RDB_PORT'),
@@ -32,7 +33,7 @@ class rconnect(object):
             return self.conn
 
     def __exit__(self, type, value, traceback):
-        print(green('CONNECT EXIT'))
+        log.info('CONNECT EXIT')
         self.conn.close()
 
 
@@ -45,9 +46,9 @@ class RethinkDB(object):
         connection = r.connect(host=app.config.get('RDB_HOST'), port=app.config.get('RDB_PORT'))
         try:
             r.db_create(app.config.get('RDB_DB')).run(connection)
-            print('Database setup completed')
+            log.info('Database setup completed')
         except RqlRuntimeError:
-            print('Database already exists.')
+            log.info('Database already exists.')
         finally:
             connection.close()
 
@@ -55,33 +56,45 @@ class RethinkDB(object):
         conn = self.connection(app)
         return r.db_drop(app.config['RDB_DB']).run(conn)
 
+    def disconnect(self, app=None):
+        log.info('DISCONNECT')
+        if app is None:
+            app = self._app
+
+        try:
+            app.rdb_conn.close()
+        except AttributeError:
+            pass
+
+    def connect(self, app=None):
+        log.info('CONNECT')
+        if app is None:
+            app = self._app
+
+        try:
+            app.rdb_conn = r.connect(
+                host=app.config.get('RDB_HOST'),
+                port=app.config.get('RDB_PORT'),
+                db=app.config.get('RDB_DB')
+            )
+            log.info(app.rdb_conn)
+        except RqlDriverError:
+            abort(503, "Database connection could be established.")
+
     def init_app(self, app):
-
-        print(magenta('RethinkSetup.init_app'))
-
+        log.info('RethinkSetup.init_app')
+        self._app = app
         self.setup(app)
 
         # open connection before each request
         @app.before_request
         def before_request():
-            print(green('CONNECT'))
-            try:
-                app.rdb_conn = r.connect(
-                    host=app.config.get('RDB_HOST'),
-                    port=app.config.get('RDB_PORT'),
-                    db=app.config.get('RDB_DB')
-                )
-                print(green(app.rdb_conn))
-            except RqlDriverError:
-                abort(503, "Database connection could be established.")
+            self.connect(app)
 
+        # close connection at end of each request
         @app.teardown_request
         def teardown_request(exception):
-            print(green('DISCONNECT'))
-            try:
-                app.rdb_conn.close()
-            except AttributeError:
-                pass
+            self.disconnect(app)
 
         # And finally...
         model_registry.init_app(app)

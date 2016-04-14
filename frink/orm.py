@@ -6,12 +6,9 @@
     ORM type functionality
 """
 
-from fabric.colors import green, red, blue, cyan, magenta, yellow  # NOQA
-
 import uuid
-import logging
 import rethinkdb as r
-from rethinkdb.errors import ReqlOpFailedError, ReqlQueryLogicError
+from rethinkdb.errors import ReqlOpFailedError
 from inflection import tableize
 from schematics.models import ModelMeta
 from schematics.exceptions import ModelValidationError, ValidationError, ModelConversionError
@@ -20,12 +17,8 @@ from .errors import FrinkError, NotUniqueError
 from .registry import model_registry
 from .connection import rconnect
 
-
-def get_log(extra=None):
-    m = "{}.{}".format(__name__, extra) if extra else __name__
-    return logging.getLogger(m)
-
-log = get_log()
+import logging
+log = logging.getLogger(__name__)
 
 
 class InstanceLayerMixin(object):
@@ -38,16 +31,16 @@ class InstanceLayerMixin(object):
             try:
                 self.validate()
             except ValidationError as e:
-                print(red(e.messages))
+                log.warn(e.messages)
                 raise
             except ModelValidationError as e:
-                print(red(e.messages))
+                log.warn(e.messages)
                 raise
             except ModelConversionError as e:
-                print(red(e.messages))
+                log.warn(e.messages)
                 raise
             except Exception as e:
-                print(red(e.messages))
+                log.warn(e.messages)
                 raise
             else:
                 # If this is a new unsaved object, it'll likely have an
@@ -73,9 +66,9 @@ class InstanceLayerMixin(object):
                     #   u'replaced': 0,
                     #   u'inserted': 1
                     # }
-                    log.info(green(rv))
+                    log.info(rv)
                 except Exception as e:
-                    log.warn(red(e))
+                    log.warn(e)
                     self.id = None
                     raise
                 else:
@@ -94,15 +87,16 @@ class InstanceLayerMixin(object):
                     self.id = str(self.id)
 
                 try:
-                    rv = r.db(
+                    query = r.db(
                         self._db
                     ).table(
                         self._table
                     ).get(
                         self.id
-                    ).delete().run(conn)
+                    ).delete()
+                    rv = query.run(conn)
                 except Exception as e:
-                    log.warn(red(e))
+                    log.warn(e)
                     raise
                 else:
                     return True
@@ -153,13 +147,13 @@ class ORMLayer(object):
 
             try:
                 query = self._base().get(id)
-                print(cyan(query))
+                log.info(query)
                 rv = query.run(conn)
             except ReqlOpFailedError as e:
-                print(red(e))
+                log.warn(e)
                 raise
             except Exception as e:
-                print(red(e))
+                log.warn(e)
                 raise
             if rv is not None:
                 return self._model(rv)
@@ -190,14 +184,14 @@ class ORMLayer(object):
                 if limit > 0:
                     query = self._limit(query, limit)
 
-                print(magenta(query))
+                log.info(query)
                 rv = query.run(conn)
 
             except ReqlOpFailedError as e:
-                print(red(e))
+                log.warn(e)
                 raise
             except Exception as e:
-                print(red(e))
+                log.warn(e)
                 raise
             else:
                 data = [self._model(_) for _ in rv]
@@ -219,7 +213,7 @@ class ORMLayer(object):
             try:
                 query = self._base()
                 if order_by is not None:
-                    print(red(order_by))
+                    log.warn(order_by)
                     query = self._order_by(query, order_by)
 
                 # NOTE: Always filter before limiting
@@ -228,10 +222,10 @@ class ORMLayer(object):
                 rv = query.run(conn)
 
             except ReqlOpFailedError as e:
-                print(red(e))
+                log.warn(e)
                 raise
             except Exception as e:
-                print(red(e))
+                log.warn(e)
                 raise
             else:
                 data = [self._model(_) for _ in rv]
@@ -264,7 +258,7 @@ class ORMLayer(object):
 
                 rv = query.filter({column: value}).run(conn)
             except Exception as e:
-                print(red(e))
+                log.warn(e)
                 raise
             else:
                 data = [self._model(_) for _ in rv]
@@ -290,7 +284,7 @@ class ORMLayer(object):
                 query = self._base()
                 rv = query.filter({column: value}).run(conn)
             except Exception as e:
-                print(red(e))
+                log.warn(e)
                 raise
             else:
                 data = [self._model(_) for _ in rv]
@@ -321,7 +315,7 @@ class ORMLayer(object):
 
                 rv = query.run(conn)
             except Exception as e:
-                print(red(e))
+                log.warn(e)
                 raise
             else:
                 data = [self._model(_) for _ in rv]
@@ -334,7 +328,7 @@ class ORMLayer(object):
             try:
                 rv = query.limit(limit)
             except Exception as e:
-                print(red(e))
+                log.warn(e)
                 raise
             else:
                 return rv
@@ -351,7 +345,7 @@ class ORMLayer(object):
             try:
                 rv = query.order_by(index)
             except Exception as e:
-                print(red(e))
+                log.warn(e)
                 raise
             else:
                 return rv

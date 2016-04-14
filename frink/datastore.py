@@ -7,12 +7,14 @@
 
 """
 
-from fabric.colors import green, red, blue, cyan, magenta, yellow  # NOQA
-
 from flask.ext.security.datastore import Datastore, UserDatastore
 from flask.ext.security.utils import get_identity_attributes
 
+# Frink
 from .errors import NotUniqueError
+
+import logging
+log = logging.getLogger(__name__)
 
 
 class FrinkDatastore(Datastore):
@@ -46,7 +48,7 @@ class FrinkUserDatastore(FrinkDatastore, UserDatastore):
                 return None
 
     def find_user(self, **kwargs):
-        print(cyan('find_user({})'.format(kwargs)))
+        log.info('find_user({})'.format(kwargs))
         if kwargs.get('id', None) is not None:
             user = self.user_model.query.get(kwargs['id'])
             if user is not None:

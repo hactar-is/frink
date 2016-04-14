@@ -6,9 +6,11 @@
     Keep a record of all the models registered.
 """
 
-from fabric.colors import green, red, blue, cyan, magenta, yellow  # NOQA
 import rethinkdb as r
 from rethinkdb.errors import ReqlOpFailedError
+
+import logging
+log = logging.getLogger(__name__)
 
 
 class ModelRegistry(object):
@@ -19,9 +21,9 @@ class ModelRegistry(object):
         self._app = None
 
     def add(self, name, model, meta):
-        print(green('Registering {} (initialised: {})'.format(
+        log.info('Registering {} (initialised: {})'.format(
             name, self._initialsed
-        )))
+        ))
 
         if name in self._models:
             return
@@ -34,7 +36,7 @@ class ModelRegistry(object):
             self._init_model(name, model)
 
     def init_app(self, app):
-        print(green('registry init_app'))
+        log.info('registry init_app')
         self._app = app
         for name, model in self._models.items():
             self._init_model(name, model)
@@ -46,7 +48,7 @@ class ModelRegistry(object):
         setattr(model.query, '_db', self._app.config.get('RDB_DB', 'test'))
         if name not in self._tables:
             try:
-                print(green('create {} table for {}'.format(model._table, name)))
+                log.info('create {} table for {}'.format(model._table, name))
                 self._conn = r.connect(
                     host=self._app.config.get('RDB_HOST'),
                     port=self._app.config.get('RDB_PORT'),
@@ -55,9 +57,9 @@ class ModelRegistry(object):
                 r.db(model._db).table_create(model._table).run(self._conn)
                 self._conn.close()
             except ReqlOpFailedError as e:
-                print(yellow('{} table probably already exists'.format(model._table)))
+                log.info('{} table probably already exists'.format(model._table))
             except Exception as e:
-                print(red(e))
+                log.warn(e)
                 raise
             else:
                 self._tables.append(name)

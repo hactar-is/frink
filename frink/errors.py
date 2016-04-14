@@ -7,14 +7,7 @@
 """
 
 import logging
-from fabric.colors import green, red, blue, cyan, magenta, yellow  # NOQA
-
-
-def get_log(extra=None):
-    m = "{}.{}".format(__name__, extra) if extra else __name__
-    return logging.getLogger(m)
-
-log = get_log()
+log = logging.getLogger(__name__)
 
 
 class FrinkError(Exception):

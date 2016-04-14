@@ -15,6 +15,10 @@ from app.core import db as _db
 
 from frink.connection import rconnect
 
+import logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
 
 @pytest.yield_fixture(scope='session')
 def app():
@@ -34,3 +38,4 @@ def db(app):
     yield _db
 
     _db.drop_all(app)
+    _db.disconnect(app)

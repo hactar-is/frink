@@ -14,8 +14,11 @@ from schematics.types.base import (
     StringType, BooleanType, DateTimeType, IntType, UUIDType
 )
 
-from .orm import ORMMeta
+# Frink
 from .orm import InstanceLayerMixin
+
+import logging
+log = logging.getLogger(__name__)
 
 
 class BaseModel(Model, InstanceLayerMixin):
@@ -27,7 +30,7 @@ class BaseModel(Model, InstanceLayerMixin):
     updated_at = DateTimeType(default=datetime.datetime.now)
 
     def validate(self):
-        print('validating')
+        log.info('validating')
         super(BaseModel, self).validate()
 
     def __repr__(self):
