@@ -52,10 +52,12 @@ class InstanceLayerMixin(object):
                     log.debug(self.id)
 
                 try:
-                    rv = r.db(self._db).table(self._table).insert(
+                    query = r.db(self._db).table(self._table).insert(
                         self.to_primitive(),
                         conflict="replace"
-                    ).run(conn)
+                    )
+                    log.info(query)
+                    rv = query.run(conn)
                     # Returns something like this:
                     # {
                     #   u'errors': 0,
@@ -94,6 +96,7 @@ class InstanceLayerMixin(object):
                     ).get(
                         self.id
                     ).delete()
+                    log.info(query)
                     rv = query.run(conn)
                 except Exception as e:
                     log.warn(e)
@@ -147,7 +150,7 @@ class ORMLayer(object):
 
             try:
                 query = self._base().get(id)
-                log.debug(query)
+                log.info(query)
                 rv = query.run(conn)
             except ReqlOpFailedError as e:
                 log.warn(e)
@@ -184,7 +187,7 @@ class ORMLayer(object):
                 if limit > 0:
                     query = self._limit(query, limit)
 
-                log.debug(query)
+                log.info(query)
                 rv = query.run(conn)
 
             except ReqlOpFailedError as e:
@@ -219,6 +222,7 @@ class ORMLayer(object):
                 # NOTE: Always filter before limiting
                 query = query.filter(kwargs)
                 query = self._limit(query, 1)
+                log.info(query)
                 rv = query.run(conn)
 
             except ReqlOpFailedError as e:
@@ -255,8 +259,9 @@ class ORMLayer(object):
                     query = self._order_by(query, order_by)
                 if limit > 0:
                     query = self._limit(query, limit)
-
-                rv = query.filter({column: value}).run(conn)
+                query = query.filter({column: value})
+                log.info(query)
+                rv = query.run(conn)
             except Exception as e:
                 log.warn(e)
                 raise
@@ -282,7 +287,9 @@ class ORMLayer(object):
 
             try:
                 query = self._base()
-                rv = query.filter({column: value}).run(conn)
+                query = query.filter({column: value})
+                log.info(query)
+                rv = query.run(conn)
             except Exception as e:
                 log.warn(e)
                 raise
@@ -313,6 +320,7 @@ class ORMLayer(object):
                 if limit > 0:
                     query = self._limit(query, limit)
 
+                log.info(query)
                 rv = query.run(conn)
             except Exception as e:
                 log.warn(e)

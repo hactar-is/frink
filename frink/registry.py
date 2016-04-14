@@ -35,6 +35,26 @@ class ModelRegistry(object):
             # run, so we need to _init_model it.
             self._init_model(name, model)
 
+    def drop_tables(self):
+        for name, model in self._models.items():
+            try:
+                log.info('Drop {} table'.format(model._table))
+                self._conn = r.connect(
+                    host=self._app.config.get('RDB_HOST'),
+                    port=self._app.config.get('RDB_PORT'),
+                    db=self._app.config.get('RDB_DB')
+                )
+                query = r.db(model._db).table_drop(model._table)
+                log.info(query)
+                query.run(self._conn)
+                self._conn.close()
+            except ReqlOpFailedError as e:
+                log.debug('{} table failed to drop'.format(model._table))
+            except Exception as e:
+                log.warn(e)
+                raise
+        return True
+
     def init_app(self, app):
         log.debug('registry init_app')
         self._app = app
@@ -54,7 +74,9 @@ class ModelRegistry(object):
                     port=self._app.config.get('RDB_PORT'),
                     db=self._app.config.get('RDB_DB')
                 )
-                r.db(model._db).table_create(model._table).run(self._conn)
+                query = r.db(model._db).table_create(model._table)
+                log.info(query)
+                query.run(self._conn)
                 self._conn.close()
             except ReqlOpFailedError as e:
                 log.debug('{} table probably already exists'.format(model._table))

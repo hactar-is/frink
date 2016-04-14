@@ -14,6 +14,7 @@ from app.factory import create_app
 from app.core import db as _db
 
 from frink.connection import rconnect
+from frink.registry import model_registry
 
 import logging
 logging.basicConfig(level=logging.INFO)
@@ -37,5 +38,6 @@ def db(app):
 
     yield _db
 
-    _db.drop_all(app)
+    # _db.drop_all(app)
+    model_registry.drop_tables()
     _db.disconnect(app)
