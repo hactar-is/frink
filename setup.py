@@ -1,15 +1,8 @@
 import setuptools
 
-
-def get_requirements(suffix=''):
-    with open('requirements%s.txt' % suffix) as f:
-        rv = f.read().splitlines()
-    return rv
-
-
 setuptools.setup(
     name="frink",
-    version="0.0.3",
+    version="0.0.4",
     url="https://github.com/hactar-is/frink",
 
     author="Hactar",
@@ -21,7 +14,13 @@ setuptools.setup(
 
     packages=setuptools.find_packages(),
 
-    install_requires=get_requirements(),
+    install_requires=[
+        'flask',
+        'schematics',
+        'rethinkdb==2.3.0',
+        'flask-security',
+        'inflection'
+    ],
 
     classifiers=[
         'Development Status :: 2 - Pre-Alpha',

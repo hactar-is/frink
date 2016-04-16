@@ -17,6 +17,9 @@ import logging
 log = logging.getLogger(__name__)
 
 
+connections = []
+
+
 class rconnect(object):
     def __enter__(self):
         log.debug('CONNECT ENTER')
@@ -30,44 +33,51 @@ class rconnect(object):
         except RqlDriverError:
             abort(503, "Database connection could be established.")
         else:
+            connections.append(self.conn)
             return self.conn
 
     def __exit__(self, type, value, traceback):
         log.debug('CONNECT EXIT')
+        connections.remove(self.conn)
         self.conn.close()
 
 
 class RethinkDB(object):
 
     def connection(self, app):
-        return r.connect(host=app.config.get('RDB_HOST'), port=app.config.get('RDB_PORT'))
+        conn = r.connect(host=app.config.get('RDB_HOST'), port=app.config.get('RDB_PORT'))
+        connections.append(conn)
+        return conn
 
     def setup(self, app):
-        connection = r.connect(host=app.config.get('RDB_HOST'), port=app.config.get('RDB_PORT'))
         try:
-            r.db_create(app.config.get('RDB_DB')).run(connection)
+            conn = r.connect(host=app.config.get('RDB_HOST'), port=app.config.get('RDB_PORT'))
+            r.db_create(app.config.get('RDB_DB')).run(conn)
+            connections.append(conn)
+            connections.remove(conn)
+            conn.close()
             log.debug('Database setup completed')
         except RqlRuntimeError:
             log.debug('Database already exists.')
-        finally:
-            connection.close()
 
     def drop_all(self, app):
-        conn = self.connection(app)
-        return r.db_drop(app.config['RDB_DB']).run(conn)
+        with rconnect() as conn:
+            return r.db_drop(app.config['RDB_DB']).run(conn)
 
     def disconnect(self, app=None):
-        log.debug('DISCONNECT')
+        log.debug('============== DISCONNECT ===============')
         if app is None:
             app = self._app
 
         try:
+            if app.rdb_conn in connections:
+                connections.remove(app.rdb_conn)
             app.rdb_conn.close()
         except AttributeError:
             pass
 
     def connect(self, app=None):
-        log.debug('CONNECT')
+        log.debug('=============== CONNECT =================')
         if app is None:
             app = self._app
 
@@ -78,8 +88,13 @@ class RethinkDB(object):
                 db=app.config.get('RDB_DB')
             )
             log.info(app.rdb_conn)
+            connections.append(app.rdb_conn)
+            assert app.rdb_conn in connections
         except RqlDriverError:
             abort(503, "Database connection could be established.")
+
+    def get_connection(self):
+        return self._app.rdb_conn
 
     def init_app(self, app):
         log.debug('RethinkSetup.init_app')

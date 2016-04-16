@@ -1,6 +1,14 @@
 Change Log
 ==========
 
+0.0.4
+-----
+
+* Removed Fabric and put some proper logging in
+* Removed requirements.txt 
+
+
+
 0.0.3
 -----
 
