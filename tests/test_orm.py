@@ -7,7 +7,7 @@ import datetime
 
 from rethinkdb.errors import ReqlOpFailedError
 
-from app.models import User, Role
+from app.models import User, Role, InvalidModel
 from frink.registry import model_registry
 from frink.datastore import FrinkUserDatastore
 from frink.errors import NotUniqueError, FrinkError
@@ -22,10 +22,9 @@ unconvertable_user_dict = {
     'password': 'this is a password'
 }
 
-invalid_user_dict = {
-    'firstname': 'Michael',
-    'lastname': 'Harriman',
-    'password': 'this is a password'
+# has a field called req which is required.
+invalid_dict = {
+    'unreq': 'Oh hai',
 }
 
 user_dict = {
@@ -69,11 +68,11 @@ def test_create_user(app):
     assert user.password == user_dict['password']
 
 
-def test_create_invalid_user(app):
-    user = User(invalid_user_dict)
+def test_create_invalid(app):
+    obj = InvalidModel(invalid_dict)
     with pytest.raises(ValidationError) as excinfo:
-        user.save()
-    assert excinfo.value.messages == {'email': [u'This field is required.']}
+        obj.save()
+    assert excinfo.value.messages == {'req': [u'This field is required.']}
 
 # No idea why this test fails.
 # def test_create_unconvertable_user(app):
@@ -259,6 +258,19 @@ def test_find_by_ordered_limit(app):
 ####################################################################################################
 
 
+def test_non_unique_email(app):
+    user = User(user_dict)
+    with pytest.raises(NotUniqueError):
+        user.save()
+
+
+def test_empty_unique_field(app):
+    user = User(user_dict)
+    user.email = None
+    with pytest.raises(ValueError):
+        user.save()
+
+
 def test_get_by(app):
     with pytest.raises(NotUniqueError):
         user = User.query.get_by(column='active', value=True)  # Should raise NotUniqueError
@@ -284,7 +296,7 @@ def test_delete_with_no_id(app):
     u.id = None
     with pytest.raises(FrinkError) as excinfo:
         u.delete()
-    assert "You can't delete an object with no ID" in excinfo.value
+    assert "You can't delete an object with no ID" in excinfo.value.message
 
 
 def test_delete_failure(app):

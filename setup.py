@@ -2,7 +2,7 @@ import setuptools
 
 setuptools.setup(
     name="frink",
-    version="0.0.4",
+    version="0.0.5",
     url="https://github.com/hactar-is/frink",
 
     author="Hactar",

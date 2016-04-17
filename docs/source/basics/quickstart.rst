@@ -61,6 +61,7 @@ Define your ``User`` and ``Role`` models.
     class User(BaseModel, UserMixin):
 
         __metaclass__ = ORMMeta
+        _uniques = ['email']
 
         email = StringType()
         password = StringType()

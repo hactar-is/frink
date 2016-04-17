@@ -33,6 +33,8 @@ class User(BaseModel, UserMixin):
 
     __metaclass__ = ORMMeta
 
+    _uniques = ['email']
+
     firstname = StringType()
     lastname = StringType()
     email = StringType(required=True)
@@ -71,3 +73,11 @@ class IdTest(BaseModel):
     __metaclass__ = ORMMeta
 
     something = IntType()
+
+
+class InvalidModel(BaseModel):
+
+    __metaclass__ = ORMMeta
+
+    unreq = StringType()
+    req = StringType(required=True)

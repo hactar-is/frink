@@ -39,8 +39,14 @@ class InstanceLayerMixin(object):
             except ModelConversionError as e:
                 log.warn(e.messages)
                 raise
-            except Exception as e:
+            except ValueError as e:
+                log.warn(e)
+                raise
+            except FrinkError as e:
                 log.warn(e.messages)
+                raise
+            except Exception as e:
+                log.warn(e)
                 raise
             else:
                 # If this is a new unsaved object, it'll likely have an

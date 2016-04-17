@@ -1,6 +1,13 @@
 Change Log
 ==========
 
+0.0.5
+-----
+
+* Added the ability to have unique fields.
+
+
+
 0.0.4
 -----
 
