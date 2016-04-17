@@ -1,8 +1,15 @@
 Change Log
 ==========
 
-0.0.5
------
+0.0.6
+------------------
+
+* Release version of 0.0.5 (don't ask)
+
+
+
+0.0.5 (Unreleased)
+------------------
 
 * Added the ability to have unique fields.
 
