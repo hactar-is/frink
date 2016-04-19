@@ -12,6 +12,7 @@ assert version is not None
 setuptools.setup(
     name="frink",
     version=version,
+
     url="https://github.com/hactar-is/frink",
 
     author="Hactar",

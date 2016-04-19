@@ -34,6 +34,8 @@ class User(BaseModel, UserMixin):
 
     __metaclass__ = ORMMeta
 
+    _uniques = ['email']
+
     firstname = StringType()
     lastname = StringType()
     email = StringType(required=True)
@@ -96,3 +98,4 @@ class Parent(BaseModel):
     name = StringType(required=True)
     child = HasOne(Child)
     spouse = HasOne("Parent")
+

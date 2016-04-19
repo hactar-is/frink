@@ -3,6 +3,23 @@ ORM
 
 The ORM part of Frink gives you very basic querying abilities. For anything a little more complex you should probably just drop down to :ref:`ReQL` anyway.
 
+
+Unique Fields
+-------------
+
+You can specify that fields need to be unique by adding them to your model's ``_uniques``. Every field included in ``_uniques`` is, by definition, also required.
+
+::
+
+    class MyModel(BaseModel):
+
+        __metaclass__ = ORMMeta
+        _uniques = ['username', 'email']
+
+    username = StringType(required=True)
+    email = StringType()
+
+
 Querying
 --------
 

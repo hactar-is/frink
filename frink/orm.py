@@ -41,8 +41,14 @@ class InstanceLayerMixin(object):
             except ModelConversionError as e:
                 log.warn(e.messages)
                 raise
-            except Exception as e:
+            except ValueError as e:
+                log.warn(e)
+                raise
+            except FrinkError as e:
                 log.warn(e.messages)
+                raise
+            except Exception as e:
+                log.warn(e)
                 raise
             else:
                 # If this is a new unsaved object, it'll likely have an
@@ -58,7 +64,7 @@ class InstanceLayerMixin(object):
                         self.to_primitive(),
                         conflict="replace"
                     )
-                    log.info(query)
+                    log.debug(query)
                     rv = query.run(conn)
                     # Returns something like this:
                     # {
@@ -98,7 +104,7 @@ class InstanceLayerMixin(object):
                     ).get(
                         self.id
                     ).delete()
-                    log.info(query)
+                    log.debug(query)
                     rv = query.run(conn)
                 except Exception as e:
                     log.warn(e)
@@ -152,7 +158,7 @@ class ORMLayer(object):
 
             try:
                 query = self._base().get(id)
-                log.info(query)
+                log.debug(query)
                 rv = query.run(conn)
             except ReqlOpFailedError as e:
                 log.warn(e)
@@ -189,7 +195,7 @@ class ORMLayer(object):
                 if limit > 0:
                     query = self._limit(query, limit)
 
-                log.info(query)
+                log.debug(query)
                 rv = query.run(conn)
 
             except ReqlOpFailedError as e:
@@ -224,7 +230,7 @@ class ORMLayer(object):
                 # NOTE: Always filter before limiting
                 query = query.filter(kwargs)
                 query = self._limit(query, 1)
-                log.info(query)
+                log.debug(query)
                 rv = query.run(conn)
 
             except ReqlOpFailedError as e:
@@ -262,7 +268,7 @@ class ORMLayer(object):
                 if limit > 0:
                     query = self._limit(query, limit)
                 query = query.filter({column: value})
-                log.info(query)
+                log.debug(query)
                 rv = query.run(conn)
             except Exception as e:
                 log.warn(e)
@@ -290,7 +296,7 @@ class ORMLayer(object):
             try:
                 query = self._base()
                 query = query.filter({column: value})
-                log.info(query)
+                log.debug(query)
                 rv = query.run(conn)
             except Exception as e:
                 log.warn(e)
@@ -322,7 +328,7 @@ class ORMLayer(object):
                 if limit > 0:
                     query = self._limit(query, limit)
 
-                log.info(query)
+                log.debug(query)
                 rv = query.run(conn)
             except Exception as e:
                 log.warn(e)
