@@ -12,6 +12,7 @@ from rethinkdb.errors import ReqlOpFailedError
 from inflection import tableize
 from schematics.models import ModelMeta
 from schematics.exceptions import ModelValidationError, ValidationError, ModelConversionError
+from schematics.types.compound import ModelType, ListType
 
 from .errors import FrinkError, NotUniqueError
 from .registry import model_registry
@@ -30,6 +31,7 @@ class InstanceLayerMixin(object):
         with rconnect() as conn:
             try:
                 self.validate()
+                import pdb; pdb.set_trace()
             except ValidationError as e:
                 log.warn(e.messages)
                 raise

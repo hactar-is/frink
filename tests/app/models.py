@@ -19,6 +19,7 @@ from flask.ext.security import UserMixin, RoleMixin
 
 from frink.base import BaseModel
 from frink.orm import ORMMeta
+from frink.types import HasOne
 
 
 class Role(BaseModel, RoleMixin):
@@ -71,3 +72,27 @@ class IdTest(BaseModel):
     __metaclass__ = ORMMeta
 
     something = IntType()
+
+
+class InvalidModel(BaseModel):
+
+    __metaclass__ = ORMMeta
+
+    unreq = StringType()
+    req = StringType(required=True)
+
+
+class Child(BaseModel):
+
+    __metaclass__ = ORMMeta
+
+    name = StringType(required=True)
+
+
+class Parent(BaseModel):
+
+    __metaclass__ = ORMMeta
+
+    name = StringType(required=True)
+    child = HasOne(Child)
+    spouse = HasOne("Parent")

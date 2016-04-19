@@ -66,6 +66,15 @@ class ModelRegistry(object):
         model._model = model
         setattr(model, '_db', self._app.config.get('RDB_DB', 'test'))
         setattr(model.query, '_db', self._app.config.get('RDB_DB', 'test'))
+        self._create_table(name, model)
+        self._create_relationships(name, model)
+
+    def _create_relationships(self, name, model):
+        for field in self.fields:
+            from fabric.colors import green, red, blue, cyan, magenta, yellow  # NOQA
+            print(yellow("field {}".format(field)))
+
+    def _create_table(self, name, model):
         if name not in self._tables:
             try:
                 log.debug('create {} table for {}'.format(model._table, name))
