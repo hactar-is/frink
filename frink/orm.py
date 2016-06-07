@@ -64,6 +64,18 @@ class InstanceLayerMixin(object):
                     self.id = str(uuid.uuid4())
                     log.debug(self.id)
 
+                # If this model has frink relationship types as fields, then we need to first save
+                # related model(s).
+                log.debug('MODEL: {}'.format(self.__class__.__name__))
+                for name, type_class in self._fields.items():
+                    if self.get(name, None) is not None:
+                        log.debug('ATTR: {} ({})'.format(name, type_class))
+                        if type_class.__class__.__name__ == 'HasOne':
+                            sub_model = model_registry.find(type_class.model_class)
+                            assert isinstance(self.get(name), sub_model)
+                            sub = self.get(name).save()
+                            setattr(self, name, sub.id)
+
                 try:
                     query = r.db(self._db).table(self._table).insert(
                         self.to_primitive(),

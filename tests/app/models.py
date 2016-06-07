@@ -19,20 +19,16 @@ from schematics.types.compound import (
 
 from frink.base import BaseModel
 from frink.orm import ORMMeta
-# from frink.types import HasOne
+from frink.types import HasOne
 
 
 class Role(with_metaclass(ORMMeta, BaseModel)):
-
-    # __metaclass__ = ORMMeta
 
     name = StringType()
     description = StringType()
 
 
 class User(with_metaclass(ORMMeta, BaseModel)):
-
-    # __metaclass__ = ORMMeta
 
     _uniques = ['email']
 
@@ -55,15 +51,11 @@ class User(with_metaclass(ORMMeta, BaseModel)):
 
 class SlugTest(with_metaclass(ORMMeta, BaseModel)):
 
-    # __metaclass__ = ORMMeta
-
     name = StringType()
     slug = StringType()
 
 
 class NameTest(with_metaclass(ORMMeta, BaseModel)):
-
-    # __metaclass__ = ORMMeta
 
     name = StringType()
     something = IntType()
@@ -71,14 +63,10 @@ class NameTest(with_metaclass(ORMMeta, BaseModel)):
 
 class IdTest(with_metaclass(ORMMeta, BaseModel)):
 
-    # __metaclass__ = ORMMeta
-
     something = IntType()
 
 
 class InvalidModel(with_metaclass(ORMMeta, BaseModel)):
-
-    # __metaclass__ = ORMMeta
 
     unreq = StringType()
     req = StringType(required=True)
@@ -86,15 +74,11 @@ class InvalidModel(with_metaclass(ORMMeta, BaseModel)):
 
 class Child(with_metaclass(ORMMeta, BaseModel)):
 
-    # __metaclass__ = ORMMeta
-
     name = StringType(required=True)
 
 
 class Parent(with_metaclass(ORMMeta, BaseModel)):
 
-    # __metaclass__ = ORMMeta
-
     name = StringType(required=True)
-    # child = HasOne(Child)
-    # spouse = HasOne("Parent")
+    child = HasOne(Child)
+    spouse = HasOne("Parent")

@@ -21,6 +21,9 @@ class ModelRegistry(object):
         self._tables = []
         self._initialsed = False
 
+    def find(self, class_name):
+        return self._models.get(class_name, None)
+
     def add(self, name, model, meta):
         log.debug('Registering {} (initialised: {})'.format(
             name, self._initialsed
@@ -46,7 +49,7 @@ class ModelRegistry(object):
                     db=frink.RDB_DB
                 )
                 query = r.db(model._db).table_drop(model._table)
-                log.info(query)
+                # log.info(query)
                 query.run(self._conn)
                 self._conn.close()
             except ReqlOpFailedError as e:

@@ -17,6 +17,7 @@ from schematics.exceptions import ValidationError
 # Frink
 from .orm import InstanceLayerMixin
 from .errors import NotUniqueError
+from .registry import model_registry
 
 import logging
 log = logging.getLogger(__name__)
@@ -24,13 +25,27 @@ log = logging.getLogger(__name__)
 
 class BaseModel(Model, InstanceLayerMixin):
 
-    # __metaclass__ = ORMMeta  # Do this in every model instead
-
     _uniques = []
 
     id = UUIDType()
     created_at = DateTimeType(default=datetime.datetime.now)
     updated_at = DateTimeType(default=datetime.datetime.now)
+
+    def __init__(self, *args, **kwargs):
+        from fabric.colors import green, red, blue, cyan, magenta, yellow  # NOQA
+        # load relationships
+        super(BaseModel, self).__init__(*args, **kwargs)
+        log.debug(magenta('MODEL: {}'.format(self)))
+        for name, type_class in self._fields.items():
+            log.debug(magenta('ATTR: {} ({})'.format(name, type_class)))
+            if self.get(name, None) is not None:
+                log.debug(magenta('ATTR 2: {} ({})'.format(name, type_class)))
+                if type_class.__class__.__name__ == 'HasOne':
+                    sub_model = model_registry.find(type_class.model_class)
+                    sub = sub_model.query.get(self.get(name))
+                    setattr(self, name, sub)
+                    assert isinstance(self.get(name), sub_model)
+
 
     def validate(self):
         log.debug('VALIDATING')
