@@ -6,7 +6,7 @@ Install
     pip install frink
 
 
-If you are contributing to the development of Frink, install it as an editable package from your own clone of the git repo. That way you can commit and push you edits.
+If you are contributing to the development of Frink, install it as an editable package from your own clone of the git repo. That way you can commit and push your edits.
 
 .. code-block:: bash
 

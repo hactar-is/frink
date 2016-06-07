@@ -5,7 +5,7 @@
 
 # Frink
 
-Basic ORM-like functionality for RethinkDB on top of Schematics. Built specifically for use with Flask and includes datastore classes for [Flask-Security](https://github.com/mattupstate/flask-security).
+Basic ORM-like functionality for RethinkDB on top of Schematics.
 
 **WARNING**: This is totally pre-alpha at the moment. Things are likely to change. If you're interested in using it in production, then contributions to get it somewhere stable would be much appreciated.
 
@@ -19,8 +19,8 @@ Don't install it yet.
 
 ## Requirements
 
-Requires the excellent [schematics](https://github.com/schematics/schematics), the [rethinkdb](https://pypi.python.org/pypi/rethinkdb/) driver, and inflection.
+Requires the excellent [schematics](https://github.com/schematics/schematics), the [rethinkdb](https://pypi.python.org/pypi/rethinkdb/) driver, future, and inflection.
 
 ## Compatibility
 
-Python 2 only at the moment, because who uses Python 3 with Flask?
+Tested with Python 2.7.6 and 3.4.3

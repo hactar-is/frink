@@ -1,6 +1,14 @@
 Change Log
 ==========
 
+0.0.7
+------------------
+
+* Removed dependencies on Flask and Fabric
+* Added Python 3 compatibility
+* Removed the Flask-Security datastore which is going to be provided in another package.
+
+
 0.0.6
 ------------------
 

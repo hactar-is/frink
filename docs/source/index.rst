@@ -9,11 +9,11 @@ Frink
 About
 -----
 
-Frink is a super basic ORM-like thing for using RethinkDB in Flask, built on top of Schematics. It has built in compatibility with :ref:`flask-security`.
+Frink is a super basic ORM-like thing for using RethinkDB in Flask, built on top of Schematics.
 
 .. WARNING::
 
-    Frink is currently pre-alpha and extremely likely to change. However, it is stable enough in the Flask-Security datastore that you could probably use it to enable Flask-Security to work with RethinkDB.
+    Frink is currently pre-alpha and extremely likely to change.
 
 .. toctree::
    :maxdepth: 2
