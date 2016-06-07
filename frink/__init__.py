@@ -20,5 +20,9 @@ class Frink(object):
         self.RDB_PORT = port
         self.RDB_DB = db
 
+        from .connection import RethinkDB
+        self.rdb = RethinkDB()
+        self.rdb.init()
+
 
 frink = Frink()

@@ -44,74 +44,69 @@ class rconnect(object):
 
 class RethinkDB(object):
 
-    def connection(self, app):
+    def connection(self):
         conn = r.connect(host=frink.RDB_HOST, port=frink.RDB_PORT)
         connections.append(conn)
         return conn
 
-    def setup(self, app):
-        try:
-            conn = r.connect(host=frink.RDB_HOST, port=frink.RDB_PORT)
-            r.db_create(frink.RDB_DB).run(conn)
-            connections.append(conn)
-            connections.remove(conn)
-            conn.close()
-            log.debug('Database setup completed')
-        except RqlRuntimeError as e:
-            log.warn(e)
-            raise
+    def setup(self):
+        conn = r.connect(host=frink.RDB_HOST, port=frink.RDB_PORT)
+        if r.db_list().contains(frink.RDB_DB).run(conn) is False:
+            try:
+                with rconnect() as conn:
+                    r.db_create(frink.RDB_DB).run(conn)
+                    log.debug('Database setup completed')
+            except RqlRuntimeError as e:
+                log.warn(e)
+                raise
+        else:
+            log.debug('Skipping DB creation')
 
-    def drop_all(self, app):
+    def drop_all(self):
         with rconnect() as conn:
             return r.db_drop(frink.RDB_DB).run(conn)
 
-    def disconnect(self, app=None):
+    def disconnect(self):
         log.debug('============== DISCONNECT ===============')
-        if app is None:
-            app = self._app
 
         try:
-            if app.rdb_conn in connections:
-                connections.remove(app.rdb_conn)
-            app.rdb_conn.close()
+            if self.rdb_conn in connections:
+                connections.remove(self.rdb_conn)
+            self.rdb_conn.close()
         except AttributeError:
             pass
 
-    def connect(self, app=None):
+    def connect(self):
         log.debug('=============== CONNECT =================')
-        if app is None:
-            app = self._app
 
         try:
-            app.rdb_conn = r.connect(
+            self.rdb_conn = r.connect(
                 host=frink.RDB_HOST,
                 port=frink.RDB_PORT,
-                db=app.config.get('RDB_DB')
+                db=frink.RDB_DB
             )
-            log.info(app.rdb_conn)
-            connections.append(app.rdb_conn)
-            assert app.rdb_conn in connections
+            connections.append(self.rdb_conn)
+            assert self.rdb_conn in connections
         except RqlDriverError as e:
             log.warn(e)
             raise
 
     def get_connection(self):
-        return self._app.rdb_conn
+        return self.rdb_conn
 
-    def init_app(self, app):
-        log.debug('RethinkSetup.init_app')
-        self._app = app
-        self.setup(app)
+    def init(self):
+        log.debug('RethinkSetup.init')
+        self.setup()
 
-        # open connection before each request
-        @app.before_request
-        def before_request():
-            self.connect(app)
+        # # open connection before each request
+        # @app.before_request
+        # def before_request():
+        #     self.connect(app)
 
-        # close connection at end of each request
-        @app.teardown_request
-        def teardown_request(exception):
-            self.disconnect(app)
+        # # close connection at end of each request
+        # @app.teardown_request
+        # def teardown_request(exception):
+        #     self.disconnect(app)
 
         # And finally...
-        model_registry.init_app(app)
+        model_registry.init()

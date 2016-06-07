@@ -31,7 +31,6 @@ class InstanceLayerMixin(object):
         with rconnect() as conn:
             try:
                 self.validate()
-                import pdb; pdb.set_trace()
             except ValidationError as e:
                 log.warn(e.messages)
                 raise

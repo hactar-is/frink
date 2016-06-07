@@ -1,7 +1,7 @@
 import ast
 import setuptools
 
-with file('frink/__init__.py') as f:
+with open('frink/__init__.py') as f:
     for line in f:
         if line.startswith('__version__'):
             version = ast.parse(line).body[0].value.s
@@ -25,10 +25,8 @@ setuptools.setup(
     packages=setuptools.find_packages(),
 
     install_requires=[
-        'flask',
         'schematics',
         'rethinkdb==2.3.0',
-        'flask-security',
         'inflection'
     ],
 

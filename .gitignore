@@ -40,3 +40,6 @@ htmlcov/**/*
 
 # Built Docs
 docs/build/**/*
+
+# venv
+venv/**/*

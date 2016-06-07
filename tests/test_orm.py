@@ -1,18 +1,14 @@
 # -*- coding: utf-8 -*-
 
-from fabric.colors import green, red, blue, cyan, magenta, yellow  # NOQA
-
 import pytest
 import datetime
 
 from rethinkdb.errors import ReqlOpFailedError
 
 from app.models import User, Role, InvalidModel
-from frink.registry import model_registry
-from frink.datastore import FrinkUserDatastore
 from frink.errors import NotUniqueError, FrinkError
 
-from schematics.exceptions import ModelConversionError, ValidationError
+from schematics.exceptions import ValidationError
 
 
 unconvertable_user_dict = {
@@ -54,11 +50,7 @@ role_dict_admin = {
 }
 
 
-def test_user_datastore_instance(app):
-    assert isinstance(app.user_datastore, FrinkUserDatastore) is True
-
-
-def test_create_user(app):
+def test_create_user():
     user = User(user_dict)
     user.save()
     assert isinstance(user, User)
@@ -68,21 +60,21 @@ def test_create_user(app):
     assert user.password == user_dict['password']
 
 
-def test_create_invalid(app):
+def test_create_invalid():
     obj = InvalidModel(invalid_dict)
     with pytest.raises(ValidationError) as excinfo:
         obj.save()
     assert excinfo.value.messages == {'req': [u'This field is required.']}
 
 # No idea why this test fails.
-# def test_create_unconvertable_user(app):
+# def test_create_unconvertable_user():
 #     user = User(unconvertable_user_dict)
 #     with pytest.raises(ModelConversionError) as excinfo:
 #         user.save()
 #     assert excinfo.value.messages == {'firstname': [u"Couldn't interpret '2001-01-01' as string."]}
 
 
-def test_create_role(app):
+def test_create_role():
     role = Role(role_dict)
     role.save()
     assert isinstance(role, Role)
@@ -90,7 +82,7 @@ def test_create_role(app):
     assert role.description == role_dict['description']
 
 
-def test_create_another_user(app):
+def test_create_another_user():
     user = User(user_dict2)
     user.save()
     assert isinstance(user, User)
@@ -100,7 +92,7 @@ def test_create_another_user(app):
     assert user.password == user_dict2['password']
 
 
-def test_create_admin_role(app):
+def test_create_admin_role():
     role = Role(role_dict_admin)
     role.save()
     assert isinstance(role, Role)
@@ -108,7 +100,7 @@ def test_create_admin_role(app):
     assert role.description == role_dict_admin['description']
 
 
-def test_orm_first(app):
+def test_orm_first():
     user = User.query.first(email=user_dict['email'])
     assert isinstance(user, User)
     assert user.firstname == user_dict['firstname']
@@ -117,25 +109,25 @@ def test_orm_first(app):
     assert user.password == user_dict['password']
 
 
-def test_orm_first_asc(app):
+def test_orm_first_asc():
     user = User.query.first(active=True, order_by='<sort_on')
     assert isinstance(user, User)
     assert user.sort_on == 0
 
 
-def test_orm_first_desc(app):
+def test_orm_first_desc():
     user = User.query.first(active=True, order_by='>sort_on')
     assert isinstance(user, User)
     assert user.sort_on == 1
 
 
-def test_orm_first_default(app):
+def test_orm_first_default():
     user = User.query.first(active=True, order_by='sort_on')
     assert isinstance(user, User)
     assert user.sort_on == 0
 
 
-def test_append_role(app):
+def test_append_role():
     _u = User.query.first(email=user_dict['email'])
     assert _u is not None
     assert isinstance(_u, User)
@@ -150,12 +142,12 @@ def test_append_role(app):
     assert _r in user.roles
 
 
-def test_all(app):
+def test_all():
     users = User.query.all()
     assert len(users) == 2
 
 
-def test_all_ordered(app):
+def test_all_ordered():
     users = User.query.all(order_by='sort_on')
     assert len(users) == 2
     assert users[0].sort_on == 0
@@ -170,7 +162,7 @@ def test_all_ordered(app):
     assert users[1].sort_on == 0
 
 
-def test_all_ordered_limited(app):
+def test_all_ordered_limited():
     users = User.query.all(order_by='sort_on', limit=1)
     assert len(users) == 1
     assert users[0].sort_on == 0
@@ -182,7 +174,7 @@ def test_all_ordered_limited(app):
     assert users[0].sort_on == 1
 
 
-def test_filter(app):
+def test_filter():
     users = User.query.filter(active=True)  # Should return all
     assert len(users) == 2
     users = User.query.filter(email=user_dict['email'])  # Should return 1
@@ -191,40 +183,40 @@ def test_filter(app):
     assert len(users) == 0
 
 
-def test_filter_order(app):
+def test_filter_order():
     users = User.query.filter(active=True, order_by='sort_on')  # Should return all
     assert len(users) == 2
     assert users[0].sort_on == 0
     assert users[1].sort_on == 1
 
 
-def test_filter_order_desc(app):
+def test_filter_order_desc():
     users = User.query.filter(active=True, order_by='>sort_on')  # Should return all
     assert len(users) == 2
     assert users[0].sort_on == 1
     assert users[1].sort_on == 0
 
 
-def test_filter_order_asc(app):
+def test_filter_order_asc():
     users = User.query.filter(active=True, order_by='<sort_on')  # Should return all
     assert len(users) == 2
     assert users[0].sort_on == 0
     assert users[1].sort_on == 1
 
 
-def test_filter_order_desc_with_limit(app):
+def test_filter_order_desc_with_limit():
     users = User.query.filter(active=True, order_by='>sort_on', limit=1)  # Should return 1
     assert len(users) == 1
     assert users[0].sort_on == 1
 
 
-def test_filter_order_asc_with_limit(app):
+def test_filter_order_asc_with_limit():
     users = User.query.filter(active=True, order_by='<sort_on', limit=1)  # Should return 1
     assert len(users) == 1
     assert users[0].sort_on == 0
 
 
-def test_find_by(app):
+def test_find_by():
     users = User.query.find_by(column='active', value=True)  # Should return all
     assert len(users) == 2
     users = User.query.find_by(column='email', value=user_dict['email'])  # Should return 1
@@ -233,7 +225,7 @@ def test_find_by(app):
     assert len(users) == 0
 
 
-def test_find_by_ordered(app):
+def test_find_by_ordered():
     users = User.query.find_by(column='active', value=True, order_by='<sort_on')  # Should return all
     assert len(users) == 2
     assert users[0].sort_on == 0
@@ -244,7 +236,7 @@ def test_find_by_ordered(app):
     assert users[1].sort_on == 0
 
 
-def test_find_by_ordered_limit(app):
+def test_find_by_ordered_limit():
     users = User.query.find_by(column='active', value=True, order_by='<sort_on', limit=1)
     assert len(users) == 1
     assert users[0].sort_on == 0
@@ -258,20 +250,20 @@ def test_find_by_ordered_limit(app):
 ####################################################################################################
 
 
-def test_non_unique_email(app):
+def test_non_unique_email():
     user = User(user_dict)
     with pytest.raises(NotUniqueError):
         user.save()
 
 
-def test_empty_unique_field(app):
+def test_empty_unique_field():
     user = User(user_dict)
     user.email = None
     with pytest.raises(ValueError):
         user.save()
 
 
-def test_get_by(app):
+def test_get_by():
     with pytest.raises(NotUniqueError):
         user = User.query.get_by(column='active', value=True)  # Should raise NotUniqueError
     user = User.query.get_by(column='email', value=user_dict['email'])  # Should return a user
@@ -281,7 +273,7 @@ def test_get_by(app):
     assert user is None
 
 
-def test_save_failure(app):
+def test_save_failure():
     u = User(user_dict)
     old_table = u._table
     u._table = 'this_table_doesnt_exist'
@@ -290,7 +282,7 @@ def test_save_failure(app):
     u._table = old_table
 
 
-def test_delete_with_no_id(app):
+def test_delete_with_no_id():
     u = User.query.first(email=user_dict['email'])
     assert isinstance(u, User)
     u.id = None
@@ -299,7 +291,7 @@ def test_delete_with_no_id(app):
     assert "You can't delete an object with no ID" in excinfo.value.message
 
 
-def test_delete_failure(app):
+def test_delete_failure():
     u = User.query.first(email=user_dict['email'])
     old_table = u._table
     u._table = 'this_table_doesnt_exist'
@@ -308,47 +300,47 @@ def test_delete_failure(app):
     u._table = old_table
 
 
-def test_get_with_none_id(app):
+def test_get_with_none_id():
     with pytest.raises(ValueError) as excinfo:
         User.query.get(None)
 
 
-def test_find_by_with_no_column(app):
+def test_find_by_with_no_column():
     with pytest.raises(ValueError) as excinfo:
         User.query.find_by(value=1)
 
 
-def test_find_by_with_no_value(app):
+def test_find_by_with_no_value():
     with pytest.raises(ValueError) as excinfo:
         User.query.find_by(column='sort_on')
 
 
-def test_get_by_with_no_column(app):
+def test_get_by_with_no_column():
     with pytest.raises(ValueError) as excinfo:
         User.query.get_by(value=1)
 
 
-def test_get_by_with_no_value(app):
+def test_get_by_with_no_value():
     with pytest.raises(ValueError) as excinfo:
         User.query.get_by(column='sort_on')
 
 
-def test_get_with_int_id(app):
+def test_get_with_int_id():
     with pytest.raises(ValueError) as excinfo:
         User.query.get(100)
 
 
-def test_filter_with_no_kwargs(app):
+def test_filter_with_no_kwargs():
     with pytest.raises(ValueError) as excinfo:
         User.query.filter(order_by='sort_on', limit=2)
 
 
-def test_first_with_no_kwargs(app):
+def test_first_with_no_kwargs():
     with pytest.raises(ValueError) as excinfo:
         User.query.first(order_by='sort_on')
 
 
-def test_limiting_with_non_int(app):
+def test_limiting_with_non_int():
     with pytest.raises(ValueError):
         users = User.query.find_by(column='active', value=True, order_by='>sort_on', limit='whut')
 
@@ -358,19 +350,19 @@ def test_limiting_with_non_int(app):
 ####################################################################################################
 
 
-def test_delete_it_all(app):
-    user1 = app.user_datastore.get_user(user_dict['email'])
-    user2 = app.user_datastore.get_user(user_dict2['email'])
-    role1 = app.user_datastore.find_role('User')
-    role2 = app.user_datastore.find_role('Admin')
+def test_delete_it_all():
+    user1 = User.query.first(email=user_dict['email'])
+    user2 = User.query.first(email=user_dict2['email'])
+    role1 = Role.query.first(name='User')
+    role2 = Role.query.first(name='Admin')
     assert user1.delete() is True
     assert role1.delete() is True
     assert user2.delete() is True
     assert role2.delete() is True
-    user1 = app.user_datastore.get_user(user_dict['email'])
-    user2 = app.user_datastore.get_user(user_dict2['email'])
-    role1 = app.user_datastore.find_role('User')
-    role2 = app.user_datastore.find_role('Admin')
+    user1 = User.query.first(email=user_dict['email'])
+    user2 = User.query.first(email=user_dict2['email'])
+    role1 = Role.query.first(name='User')
+    role2 = Role.query.first(name='Admin')
     assert user1 is None
     assert role1 is None
     assert user2 is None
@@ -397,7 +389,7 @@ def test_all_connections_are_closed():
     table name. Maybe this is a good thing.
 """
 
-# def test_filter_with_bad_table(app):
+# def test_filter_with_bad_table():
 #     old_table = User._table
 #     old_db = User._orm._db
 #     User._table = 'this_table_doesnt_exist'

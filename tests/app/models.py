@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 
 """
-    marv.schemas.models
-    ~~~~~~~~~~~~~
-    Data validation schemas for the models.
+    app.models
+    ~~~~~~~~~~
+    Data models for testing Frink.
 """
 
 import datetime
@@ -15,14 +15,12 @@ from schematics.types.compound import (
     ListType, ModelType
 )
 
-from flask.ext.security import UserMixin, RoleMixin
-
 from frink.base import BaseModel
 from frink.orm import ORMMeta
-from frink.types import HasOne
+# from frink.types import HasOne
 
 
-class Role(BaseModel, RoleMixin):
+class Role(BaseModel):
 
     __metaclass__ = ORMMeta
 
@@ -30,7 +28,7 @@ class Role(BaseModel, RoleMixin):
     description = StringType()
 
 
-class User(BaseModel, UserMixin):
+class User(BaseModel):
 
     __metaclass__ = ORMMeta
 
@@ -96,6 +94,5 @@ class Parent(BaseModel):
     __metaclass__ = ORMMeta
 
     name = StringType(required=True)
-    child = HasOne(Child)
-    spouse = HasOne("Parent")
-
+    # child = HasOne(Child)
+    # spouse = HasOne("Parent")
