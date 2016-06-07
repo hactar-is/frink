@@ -27,21 +27,21 @@ id_dict = {
 }
 
 
-def test_repr_email():
+def test_repr_email(base):
     obj = User(email_dict)
     assert obj.__repr__() == '<User: {}>'.format(email_dict['email'])
 
 
-def test_repr_slug():
+def test_repr_slug(base):
     obj = SlugTest(slug_dict)
     assert obj.__repr__() == '<SlugTest: {}>'.format(slug_dict['slug'])
 
 
-def test_repr_name():
+def test_repr_name(base):
     obj = NameTest(name_dict)
     assert obj.__repr__() == '<NameTest: {}>'.format(name_dict['name'])
 
 
-def test_repr_id():
+def test_repr_id(base):
     obj = IdTest(id_dict)
     assert obj.__repr__() == '<IdTest: {}>'.format(id_dict['id'])

@@ -6,6 +6,8 @@
     Data models for testing Frink.
 """
 
+from future.utils import with_metaclass
+
 import datetime
 from schematics.types.base import (
     StringType, BooleanType, DateTimeType, IntType
@@ -20,17 +22,17 @@ from frink.orm import ORMMeta
 # from frink.types import HasOne
 
 
-class Role(BaseModel):
+class Role(with_metaclass(ORMMeta, BaseModel)):
 
-    __metaclass__ = ORMMeta
+    # __metaclass__ = ORMMeta
 
     name = StringType()
     description = StringType()
 
 
-class User(BaseModel):
+class User(with_metaclass(ORMMeta, BaseModel)):
 
-    __metaclass__ = ORMMeta
+    # __metaclass__ = ORMMeta
 
     _uniques = ['email']
 
@@ -51,47 +53,47 @@ class User(BaseModel):
     roles = ListType(ModelType(Role), default=[])
 
 
-class SlugTest(BaseModel):
+class SlugTest(with_metaclass(ORMMeta, BaseModel)):
 
-    __metaclass__ = ORMMeta
+    # __metaclass__ = ORMMeta
 
     name = StringType()
     slug = StringType()
 
 
-class NameTest(BaseModel):
+class NameTest(with_metaclass(ORMMeta, BaseModel)):
 
-    __metaclass__ = ORMMeta
+    # __metaclass__ = ORMMeta
 
     name = StringType()
     something = IntType()
 
 
-class IdTest(BaseModel):
+class IdTest(with_metaclass(ORMMeta, BaseModel)):
 
-    __metaclass__ = ORMMeta
+    # __metaclass__ = ORMMeta
 
     something = IntType()
 
 
-class InvalidModel(BaseModel):
+class InvalidModel(with_metaclass(ORMMeta, BaseModel)):
 
-    __metaclass__ = ORMMeta
+    # __metaclass__ = ORMMeta
 
     unreq = StringType()
     req = StringType(required=True)
 
 
-class Child(BaseModel):
+class Child(with_metaclass(ORMMeta, BaseModel)):
 
-    __metaclass__ = ORMMeta
+    # __metaclass__ = ORMMeta
 
     name = StringType(required=True)
 
 
-class Parent(BaseModel):
+class Parent(with_metaclass(ORMMeta, BaseModel)):
 
-    __metaclass__ = ORMMeta
+    # __metaclass__ = ORMMeta
 
     name = StringType(required=True)
     # child = HasOne(Child)

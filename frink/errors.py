@@ -13,10 +13,10 @@ from schematics.exceptions import BaseError
 
 class FrinkError(BaseError):
     def __init__(self, messages="Generic Frink error"):
-        super(FrinkError, self).__init__(messages)
+        BaseError.__init__(self, messages)
 
 
 class NotUniqueError(FrinkError):
 
     def __init__(self, messages="Something isn't unique"):
-        super(NotUniqueError, self).__init__(messages)
+        BaseError.__init__(self, messages)

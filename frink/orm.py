@@ -22,6 +22,12 @@ import logging
 log = logging.getLogger(__name__)
 
 
+try:
+    unicode  # NOQA
+except:
+    unicode = str
+
+
 class InstanceLayerMixin(object):
 
     def save(self):
@@ -117,6 +123,7 @@ class ORMMeta(ModelMeta):
     instance = None
 
     def __new__(cls, name, bases, dct):
+        log.debug('ORMMeta {}'.format(name))
         if name != "BaseModel":
             # We have a model class
             cls._table = tableize(name)

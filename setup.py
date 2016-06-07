@@ -27,7 +27,8 @@ setuptools.setup(
     install_requires=[
         'schematics',
         'rethinkdb==2.3.0',
-        'inflection'
+        'inflection',
+        'future'
     ],
 
     classifiers=[
