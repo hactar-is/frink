@@ -21,7 +21,6 @@ role_dict = {
 }
 
 
-
 def test_user_datastore_instance(app):
     assert isinstance(app.user_datastore, FrinkUserDatastore) is True
 

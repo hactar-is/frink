@@ -7,3 +7,18 @@
 """
 
 __version__ = "0.0.7.dev"
+
+
+class Frink(object):
+    RDB_HOST = '127.0.0.1'
+    RDB_PORT = 28015
+    RDB_DB = ''
+
+    def init(self, db=RDB_DB, host=RDB_HOST, port=RDB_PORT):
+        """Create the Frink object to store the connection credentials."""
+        self.RDB_HOST = host
+        self.RDB_PORT = port
+        self.RDB_DB = db
+
+
+frink = Frink()

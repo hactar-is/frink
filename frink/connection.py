@@ -6,12 +6,12 @@
     Setup of RethinkDB stuff.
 """
 
-from flask import abort, current_app
 import rethinkdb as r
 from rethinkdb.errors import RqlRuntimeError, RqlDriverError
 
 # Frink
 from .registry import model_registry
+from . import frink
 
 import logging
 log = logging.getLogger(__name__)
@@ -22,16 +22,16 @@ connections = []
 
 class rconnect(object):
     def __enter__(self):
-        log.debug('CONNECT ENTER')
+        log.debug('CONNECT ENTER - {}:{}/{}'.format(frink.RDB_HOST, frink.RDB_PORT, frink.RDB_DB))
         try:
-            app = current_app
             self.conn = r.connect(
-                host=app.config.get('RDB_HOST'),
-                port=app.config.get('RDB_PORT'),
-                db=app.config.get('RDB_DB')
+                host=frink.RDB_HOST,
+                port=frink.RDB_PORT,
+                db=frink.RDB_DB
             )
-        except RqlDriverError:
-            abort(503, "Database connection could be established.")
+        except RqlDriverError as e:
+            log.warn(e)
+            raise
         else:
             connections.append(self.conn)
             return self.conn
@@ -45,24 +45,25 @@ class rconnect(object):
 class RethinkDB(object):
 
     def connection(self, app):
-        conn = r.connect(host=app.config.get('RDB_HOST'), port=app.config.get('RDB_PORT'))
+        conn = r.connect(host=frink.RDB_HOST, port=frink.RDB_PORT)
         connections.append(conn)
         return conn
 
     def setup(self, app):
         try:
-            conn = r.connect(host=app.config.get('RDB_HOST'), port=app.config.get('RDB_PORT'))
-            r.db_create(app.config.get('RDB_DB')).run(conn)
+            conn = r.connect(host=frink.RDB_HOST, port=frink.RDB_PORT)
+            r.db_create(frink.RDB_DB).run(conn)
             connections.append(conn)
             connections.remove(conn)
             conn.close()
             log.debug('Database setup completed')
-        except RqlRuntimeError:
-            log.debug('Database already exists.')
+        except RqlRuntimeError as e:
+            log.warn(e)
+            raise
 
     def drop_all(self, app):
         with rconnect() as conn:
-            return r.db_drop(app.config['RDB_DB']).run(conn)
+            return r.db_drop(frink.RDB_DB).run(conn)
 
     def disconnect(self, app=None):
         log.debug('============== DISCONNECT ===============')
@@ -83,15 +84,16 @@ class RethinkDB(object):
 
         try:
             app.rdb_conn = r.connect(
-                host=app.config.get('RDB_HOST'),
-                port=app.config.get('RDB_PORT'),
+                host=frink.RDB_HOST,
+                port=frink.RDB_PORT,
                 db=app.config.get('RDB_DB')
             )
             log.info(app.rdb_conn)
             connections.append(app.rdb_conn)
             assert app.rdb_conn in connections
-        except RqlDriverError:
-            abort(503, "Database connection could be established.")
+        except RqlDriverError as e:
+            log.warn(e)
+            raise
 
     def get_connection(self):
         return self._app.rdb_conn
